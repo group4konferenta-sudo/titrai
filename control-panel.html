@@ -3662,23 +3662,27 @@ async function fetchFromGoogle() {
         const data = await response.text();
         const rows = data.split('\n');
         
-        // Einame per visas rastas eilutes (nuo 1-os iki 4-os ar daugiau)
+        // Einame per visas rastas eilutes
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].trim() === "") continue; 
+            const rowText = rows[i].trim();
+            if (rowText === "") continue; // Jei eilutė visiškai tuščia - praleidžiam
 
-            const cols = parseCSVRow(rows[i]);
-            const newName = cols[0] || "";
-            const newInfo = cols[1] || "";
+            const cols = parseCSVRow(rowText);
+            
+            // SAUGIKLIS: Jei stulpelyje nėra bent vardo, šitos eilutės neliečiam
+            if (cols.length === 0 || !cols[0]) continue;
 
-            // Surandame atitinkamus laukelius pagal jų numerį (i+1)
+            const newName = cols[0]; 
+            const newInfo = cols[1] || ""; // Jei pareigų nėra, bus tuščias tekstas, o ne undefined
+
             const nameInput = document.getElementById(`alt-${i+1}-name`);
             const infoInput = document.getElementById(`alt-${i+1}-info`);
 
-            // Pildome laukelius TIK jei duomenys skiriasi (kad be reikalo „nemaskatuotų“)
-            if (nameInput && newName !== "" && nameInput.value !== newName) {
+            // Pildome TIK jei laukelis egzistuoja ir duomenys tikrai pasikeitė
+            if (nameInput && nameInput.value !== newName) {
                 nameInput.value = newName;
                 if (infoInput) infoInput.value = newInfo;
-                console.log(`Laukelis alt-${i+1} paruoštas: ${newName}`);
+                console.log(`Laukelis alt-${i+1} sėkmingai paruoštas: ${newName}`);
             }
         }
     } catch (e) {
