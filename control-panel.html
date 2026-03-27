@@ -3662,27 +3662,34 @@ async function fetchFromGoogle() {
         const data = await response.text();
         const rows = data.split('\n');
         
-        // Einame per visas rastas eilutes
-        for (let i = 0; i < rows.length; i++) {
-            const rowText = rows[i].trim();
-            if (rowText === "") continue; // Jei eilutė visiškai tuščia - praleidžiam
+        let sheetRow = 0; // Kurią eilutę skaitome iš Google Sheets
 
-            const cols = parseCSVRow(rowText);
+        // Einame per 4 šablonus (tavo pluginas turi 4 pagrindinius blokus)
+        for (let sablonas = 1; sablonas <= 4; sablonas++) {
             
-            // SAUGIKLIS: Jei stulpelyje nėra bent vardo, šitos eilutės neliečiam
-            if (cols.length === 0 || !cols[0]) continue;
+            // Kiekvienas šablonas turi po 10 titrų eilučių
+            for (let titras = 1; titras <= 10; titras++) {
+                
+                const rowText = rows[sheetRow] ? rows[sheetRow].trim() : "";
+                
+                // Jei Google Sheets eilutė egzistuoja ir nėra tuščia
+                if (rowText !== "") {
+                    const cols = parseCSVRow(rowText);
+                    const newName = cols[0] || "";
+                    const newInfo = cols[1] || "";
 
-            const newName = cols[0]; 
-            const newInfo = cols[1] || ""; // Jei pareigų nėra, bus tuščias tekstas, o ne undefined
+                    // Tavo plugino ID struktūra: alt-1-1-name, alt-1-2-name... 
+                    // (Priklausomai nuo tavo HTML, patikslink jei ID skiriasi!)
+                    const nameInput = document.getElementById(`alt-${sablonas}-${titras}-name`);
+                    const infoInput = document.getElementById(`alt-${sablonas}-${titras}-info`);
 
-            const nameInput = document.getElementById(`alt-${i+1}-name`);
-            const infoInput = document.getElementById(`alt-${i+1}-info`);
-
-            // Pildome TIK jei laukelis egzistuoja ir duomenys tikrai pasikeitė
-            if (nameInput && nameInput.value !== newName) {
-                nameInput.value = newName;
-                if (infoInput) infoInput.value = newInfo;
-                console.log(`Laukelis alt-${i+1} sėkmingai paruoštas: ${newName}`);
+                    if (nameInput && nameInput.value !== newName) {
+                        nameInput.value = newName;
+                        if (infoInput) infoInput.value = newInfo;
+                        console.log(`Užpildytas Šablonas ${sablonas}, Titras ${titras}: ${newName}`);
+                    }
+                }
+                sheetRow++; // Einame prie kitos eilutės Google Sheets'e
             }
         }
     } catch (e) {
