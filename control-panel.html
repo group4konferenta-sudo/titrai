@@ -3650,9 +3650,8 @@
 // Tavo Google Sheets CSV nuoroda
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv"; 
 
-// Funkcija, kuri protingai skaido CSV (ignoruoja kablelius kabučių viduje)
+// Funkcija protingam CSV skaidymui (nebijo kablelių pareigose)
 function parseCSVRow(text) {
-    // Reguliarioji išraiška: skaido per kablelius, kurie NĖRA kabučių viduje
     const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
     return text.split(re).map(item => item.replace(/^"|"$/g, "").trim());
 }
@@ -3663,39 +3662,34 @@ async function fetchFromGoogle() {
         const data = await response.text();
         const rows = data.split('\n');
         
-        // Einame per visas Google Sheets eilutes (iki 4 titrų)
+        // Einame per visas rastas eilutes (nuo 1-os iki 4-os ar daugiau)
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].trim() === "") continue; // Praleidžiam tuščias eilutes
+            if (rows[i].trim() === "") continue; 
 
             const cols = parseCSVRow(rows[i]);
             const newName = cols[0] || "";
             const newInfo = cols[1] || "";
 
-            // Skaičius i+1 atitinka tavo laukelių ID (pvz., alt-1, alt-2...)
+            // Surandame atitinkamus laukelius pagal jų numerį (i+1)
             const nameInput = document.getElementById(`alt-${i+1}-name`);
             const infoInput = document.getElementById(`alt-${i+1}-info`);
 
+            // Pildome laukelius TIK jei duomenys skiriasi (kad be reikalo „nemaskatuotų“)
             if (nameInput && newName !== "" && nameInput.value !== newName) {
-                nameInput.value = naujasVardas;
-                if (infoInput) infoInput.value = naujaInfo;
-                
-                // ČIA SVARBU: function_send() paprastai išsiunčia TIK aktyvų šabloną.
-                // Jei nori, kad užpildytų, bet neiššautų į ekraną iškart, 
-                // šią eilutę galima užkomentuoti.
-                if (typeof function_send === "function") {
-                    // function_send(); 
-                }
+                nameInput.value = newName;
+                if (infoInput) infoInput.value = newInfo;
+                console.log(`Laukelis alt-${i+1} paruoštas: ${newName}`);
             }
         }
     } catch (e) {
-        console.error("Klaida pildant laukelius:", e);
+        console.error("Duomenų sinchronizavimo klaida:", e);
     }
 }
 
-// Tikriname kas 2 sekundes
+// Tikriname kas 2 sekundes, kad skydelis visada būtų „šviežias“
 setInterval(fetchFromGoogle, 2000);
 
-// Paleidžiame iškart užsikrovus
+// Paleidžiame pirmą kartą iškart užsikrovus
 window.onload = fetchFromGoogle;
 </script>
 
