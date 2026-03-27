@@ -1420,14 +1420,14 @@
 
 			//Load the theme style
 			var theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark';
-			$('head').append('<link rel="stylesheet" href="../common/css/themes/' + theme + '/theme.css"/>');
+			$('head').append('<link rel="stylesheet" href="common/css/themes/' + theme + '/theme.css"/>');
 
 			function changeTheme(newTheme) {
-				$('link[href="../common/css/themes/' + theme + '/theme.css"]').remove();
+				$('link[href="common/css/themes/' + theme + '/theme.css"]').remove();
 				var head= document.getElementsByTagName('head')[0];
 				var link= document.createElement('link');
 				link.rel= "stylesheet";
-				link.href= "../common/css/themes/" + newTheme + "/theme.css";
+				link.href= "common/css/themes/" + newTheme + "/theme.css";
 				head.appendChild(link);
 				theme = newTheme;
 			}
