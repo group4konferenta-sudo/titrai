@@ -3647,10 +3647,15 @@
 
 
 <script>
-// ČIA ĮKLIJUOK SAVO GOOGLE SHEETS CSV NUORODĄ (baigiasi format=csv)
+// Tavo Google Sheets CSV nuoroda
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv"; 
 
-let lastSeenName = "";
+// Funkcija, kuri protingai skaido CSV (ignoruoja kablelius kabučių viduje)
+function parseCSVRow(text) {
+    // Reguliarioji išraiška: skaido per kablelius, kurie NĖRA kabučių viduje
+    const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+    return text.split(re).map(item => item.replace(/^"|"$/g, "").trim());
+}
 
 async function fetchFromGoogle() {
     try {
@@ -3659,18 +3664,21 @@ async function fetchFromGoogle() {
         const rows = data.split('\n');
         
         if (rows.length > 0) {
-            const cols = rows[0].split(',');
-            const newName = cols[0].replace(/"/g, "").trim();
-            const newInfo = cols[1] ? cols[1].replace(/"/g, "").trim() : "";
+            // Naudojame naują protingą skaidymą pirmai eilutei
+            const cols = parseCSVRow(rows[0]);
+            
+            const newName = cols[0] || ""; // Pirmas stulpelis
+            const newInfo = cols[1] || ""; // Antras stulpelis
 
             const nameInput = document.getElementById('alt-1-name');
             const infoInput = document.getElementById('alt-1-info');
 
-            if (nameInput && nameInput.value !== newName) {
+            // Tikriname, ar vardas pasikeitė ir ar jis nėra tuščias
+            if (nameInput && newName !== "" && nameInput.value !== newName) {
                 nameInput.value = newName;
                 if (infoInput) infoInput.value = newInfo;
 
-                // Išsiunčiame į OBS (tavo rasta funkcija)
+                // Išsiunčiame į OBS (automatiškai „nuspaudžiame“ mygtuką)
                 if (typeof function_send === "function") {
                     function_send();
                     console.log("Atnaujinta iš Google: " + newName);
@@ -3684,9 +3692,10 @@ async function fetchFromGoogle() {
 
 // Tikriname kas 2 sekundes
 setInterval(fetchFromGoogle, 2000);
+
+// Paleidžiame iškart užsikrovus
 window.onload = fetchFromGoogle;
 </script>
-
 
 
 
