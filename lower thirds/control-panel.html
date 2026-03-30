@@ -3645,7 +3645,6 @@
 
 
 <script>
-// --- GOOGLE SHEETS TIESIOGINIS VARIKLIS ---
 const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
 async function masterSync() {
@@ -3656,45 +3655,37 @@ async function masterSync() {
 
         rows.forEach((row, i) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            const id = i + 1;
+            const id = i + 1; // Eilutės numeris (1, 2, 3...)
             const name = cols[0] || "";
             const info = cols[1] || "";
 
-            // 1. Įrašome į naršyklės atmintį (Overlay failui)
-            localStorage.setItem(`alt-${id}-name`, name);
-            localStorage.setItem(`alt-${id}-info`, info);
+            // --- SVARBU: Autoriaus raktų sistema ---
+            // Mes pildome TIK PIRMĄ ŠABLONĄ (alt-1), bet skirtingus jo slotus (1-40)
+            localStorage.setItem(`alt-1-name-${id}`, name);
+            localStorage.setItem(`alt-1-info-${id}`, info);
 
-            // 2. Įrašome į redagavimo laukelius pultelyje
-            const nameInp = document.getElementById(`alt-${id}-name`);
-            const infoInp = document.getElementById(`alt-${id}-info`);
+            // Įrašome į redagavimo laukelius pultelyje (jei atidarytas tas slotas)
+            const nameInp = document.getElementById(`alt-1-name-${id}`);
             if (nameInp) nameInp.value = name;
-            if (infoInp) infoInp.value = info;
 
-            // 3. Priverstinai užpildome VARDUS ant mygtukų visuose 4 šablonuose
-            for (let t = 1; t <= 4; t++) {
-                const slot = document.getElementById(`alt-${t}-slot-name-${id}`);
-                if (slot) {
-                    slot.innerText = name;
-                    // Jei yra vardas, padarome mygtuką "gyvą"
-                    if (name.trim() !== "") {
-                        const parent = slot.parentElement;
-                        parent.style.backgroundColor = "#2a5a8a"; // Melsva
-                        parent.style.opacity = "1";
-                        parent.style.pointerEvents = "auto";
-                        parent.classList.add('active-slot');
-                    }
+            // Priverstinai nupiešiame vardus ant mygtukų 1-ame šablone
+            const slot = document.getElementById(`alt-1-slot-name-${id}`);
+            if (slot) {
+                slot.innerText = name;
+                if (name.trim() !== "") {
+                    const parent = slot.parentElement;
+                    parent.style.backgroundColor = "#2a5a8a"; // Melsva
+                    parent.style.opacity = "1";
+                    parent.style.pointerEvents = "auto";
+                    parent.classList.add('active-slot');
                 }
             }
         });
-        console.log("Linkoras paruoštas. Duomenys supūsti.");
+        console.log("1-o šablono 40 titrų užpildyti!");
     } catch (e) { console.error("Klaida:", e); }
 }
 
-// Paleidžiame po trumpos pauzės, kad autoriaus pultas spėtų atsikvėpti
-setTimeout(() => {
-    masterSync();
-    setInterval(masterSync, 5000); 
-}, 2000);
+setTimeout(() => { masterSync(); setInterval(masterSync, 5000); }, 2000);
 </script>
 
 
