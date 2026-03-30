@@ -3639,5 +3639,68 @@
 
 		</script>
 
+
+
+
+
+
+<script>
+// --- GOOGLE SHEETS TIESIOGINIS VARIKLIS ---
+const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+
+async function masterSync() {
+    try {
+        const r = await fetch(GOOGLE_URL + "&cb=" + Date.now());
+        const data = await r.text();
+        const rows = data.split('\n').filter(row => row.trim() !== "");
+
+        rows.forEach((row, i) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            const id = i + 1;
+            const name = cols[0] || "";
+            const info = cols[1] || "";
+
+            // 1. Įrašome į naršyklės atmintį (Overlay failui)
+            localStorage.setItem(`alt-${id}-name`, name);
+            localStorage.setItem(`alt-${id}-info`, info);
+
+            // 2. Įrašome į redagavimo laukelius pultelyje
+            const nameInp = document.getElementById(`alt-${id}-name`);
+            const infoInp = document.getElementById(`alt-${id}-info`);
+            if (nameInp) nameInp.value = name;
+            if (infoInp) infoInp.value = info;
+
+            // 3. Priverstinai užpildome VARDUS ant mygtukų visuose 4 šablonuose
+            for (let t = 1; t <= 4; t++) {
+                const slot = document.getElementById(`alt-${t}-slot-name-${id}`);
+                if (slot) {
+                    slot.innerText = name;
+                    // Jei yra vardas, padarome mygtuką "gyvą"
+                    if (name.trim() !== "") {
+                        const parent = slot.parentElement;
+                        parent.style.backgroundColor = "#2a5a8a"; // Melsva
+                        parent.style.opacity = "1";
+                        parent.style.pointerEvents = "auto";
+                        parent.classList.add('active-slot');
+                    }
+                }
+            }
+        });
+        console.log("Linkoras paruoštas. Duomenys supūsti.");
+    } catch (e) { console.error("Klaida:", e); }
+}
+
+// Paleidžiame po trumpos pauzės, kad autoriaus pultas spėtų atsikvėpti
+setTimeout(() => {
+    masterSync();
+    setInterval(masterSync, 5000); 
+}, 2000);
+</script>
+
+
+
+
+
+
 	</body>
 </html>
