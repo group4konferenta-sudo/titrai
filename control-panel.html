@@ -15,7 +15,6 @@
 		<script src="common/js/jquery-ui.js"></script>
 	</head>
 	<body class="lower-thirds-panel panel">
-		<h1>MATAU ŠITĄ UŽRAŠĄ</h1>
 		<div id="alt-panel" class="static-panel-top" style="margin-bottom: 0px">
 			
 			<div id="alt-main-config-content"> <!--// Main Settings//-->
@@ -3639,6 +3638,72 @@
 			});
 
 		</script>
+
+
+
+
+
+
+
+
+
+<script>
+// Tavo Google Sheets nuoroda
+const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+
+async function fetchFromGoogle() {
+    try {
+        console.log("Jungiamasi prie Google Sheets...");
+        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
+        const data = await response.text();
+        const rows = data.split('\n');
+
+        // Einame per pirmas 10 eilučių (dažniausiai tiek būna skydelyje)
+        for (let i = 0; i < 10; i++) {
+            const rowText = rows[i] ? rows[i].trim() : "";
+            if (!rowText) continue;
+
+            // Teisingas CSV skaidymas (su kableliais kabutėse)
+            const cols = rowText.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            
+            const newName = cols[0] || "";
+            const newInfo = cols[1] || "";
+
+            // Ieškome laukelių pagal ID (alt-1-name, alt-2-name ir t.t.)
+            const nameInput = document.getElementById(`alt-${i+1}-name`);
+            const infoInput = document.getElementById(`alt-${i+1}-info`);
+
+            if (nameInput) {
+                // SVARBU: Priverstinai įrašome reikšmę, kad "permuštų" cache
+                nameInput.value = newName;
+                // Jei skydelis turi "change" eventą, jį aktyvuojame
+                nameInput.dispatchEvent(new Event('change')); 
+            }
+            if (infoInput) {
+                infoInput.value = newInfo;
+                infoInput.dispatchEvent(new Event('change'));
+            }
+        }
+        console.log("Duomenys sėkmingai atnaujinti!");
+    } catch (e) {
+        console.error("Klaida siunčiant duomenis:", e);
+    }
+}
+
+// Paleidžiame iškart ir tada kas 3 sekundes
+window.addEventListener('load', function() {
+    setTimeout(fetchFromGoogle, 1000); // Maža pauzė, kol užsikraus stiliai
+    setInterval(fetchFromGoogle, 3000); 
+});
+</script>
+
+
+
+
+
+
+
+
 
 	</body>
 </html>
