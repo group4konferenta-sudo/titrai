@@ -3662,32 +3662,34 @@ async function fetchFromGoogle() {
         const data = await response.text();
         const rows = data.split('\n');
         
-        // Einame per visas Google Sheets eilutes (iki 40 eilučių)
+        // Surandame VISUS vardo ir informacijos laukelius, kurie yra skydelyje
+        const allNameInputs = document.querySelectorAll('input[id$="-name"]');
+        const allInfoInputs = document.querySelectorAll('input[id$="-info"]');
+
+        // Einame per Google Sheets eilutes
         for (let i = 0; i < rows.length; i++) {
             const rowText = rows[i] ? rows[i].trim() : "";
-            
-            // Jei eilutė tuščia, praleidžiame ją, kad negautume "Undefined"
             if (rowText === "") continue;
 
             const cols = parseCSVRow(rowText);
             const newName = cols[0] || "";
             const newInfo = cols[1] || "";
 
-            // Tavo plugino struktūra: alt-1-name, alt-2-name ... iki alt-40-name
-            const nameInput = document.getElementById(`alt-${i+1}-name`);
-            const infoInput = document.getElementById(`alt-${i+1}-info`);
-
-            // Pildome TIK jei toks laukelis egzistuoja ir duomenys tikrai nauji
-            if (nameInput) {
-                if (newName !== "" && nameInput.value !== newName) {
-                    nameInput.value = newName;
-                    if (infoInput) infoInput.value = newInfo;
-                    console.log(`Atnaujintas titras nr. ${i+1}: ${newName}`);
+            // Jei skydelyje egzistuoja laukelis šiuo numeriu (pvz., 1, 2, 3...)
+            if (allNameInputs[i]) {
+                if (newName !== "" && allNameInputs[i].value !== newName) {
+                    allNameInputs[i].value = newName;
+                    
+                    // Jei yra atitinkamas info laukelis, užpildome ir jį
+                    if (allInfoInputs[i]) {
+                        allInfoInputs[i].value = newInfo;
+                    }
+                    console.log(`Automatiškai užpildytas laukelis nr. ${i+1}: ${newName}`);
                 }
             }
         }
     } catch (e) {
-        console.error("Sinchronizavimo klaida:", e);
+        console.error("Klaida:", e);
     }
 }
 
