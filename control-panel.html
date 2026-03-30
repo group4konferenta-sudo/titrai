@@ -3637,62 +3637,7 @@
 
 
 
-<script>
-const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-async function forceUpdate() {
-    try {
-        console.log("Jungiamasi prie Google Sheets...");
-        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
-        const data = await response.text();
-        const rows = data.split('\n').filter(r => r.trim() !== "");
-
-        // Einame per kiekvieną eilutę iš Google Sheets
-        rows.forEach((row, index) => {
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            const i = index + 1;
-            
-            const name = cols[0] || "";
-            const info = cols[1] || "";
-
-            // 1. Įrašome į localStorage (Kad OBS matytų)
-            localStorage.setItem(`alt-${i}-name`, name);
-            localStorage.setItem(`alt-${i}-info`, info);
-
-            // 2. Surandame VISUS laukelius, kurie atsakingi už šį numerį
-            // Naudojame jQuery "Attribute Contains" selektorių, kad tikrai pataikytume
-            $(`[id*="alt-${i}-name"]`).val(name).text(name);
-            $(`[id*="alt-${i}-info"]`).val(info).text(info);
-            
-            // 3. Specialiai užpildome mygtukų (Slotų) pavadinimus
-            $(`div[id*="slot-name-${i}"]`).text(name);
-            $(`div[id*="slot-info-${i}"]`).text(info);
-        });
-
-        // 4. Priverstinai "pažadiname" mygtukus
-        $('.slot-number').css({'pointer-events': 'auto', 'opacity': '1', 'cursor': 'pointer'});
-        
-        // 5. Iškviečiame autoriaus funkciją, kuri nusiunčia duomenis į titrus
-        if (typeof function_send === "function") function_send();
-
-        console.log("DUOMENYS ATNAUJINTI: " + rows.length + " titrai.");
-    } catch (e) { console.error("Klaida:", e); }
-}
-
-// PIRMASIS PALEIDIMAS: Išvalome seną šlamštą iš naršyklės atminties
-window.addEventListener('load', function() {
-    // Jei dar nebuvome išvalę šioje sesijoje
-    if (!sessionStorage.getItem('hard_reset_done')) {
-        localStorage.clear(); 
-        sessionStorage.setItem('hard_reset_done', 'true');
-        console.log("Atmintis išvalyta. Kraunami nauji duomenys...");
-        setTimeout(() => { location.reload(); }, 500); 
-    } else {
-        setTimeout(forceUpdate, 1000);
-        setInterval(forceUpdate, 4000); // Kas 4 sekundes
-    }
-});
-</script>
 
 
 
