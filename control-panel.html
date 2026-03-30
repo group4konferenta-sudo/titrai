@@ -3647,54 +3647,45 @@
 
 
 
+
+
 <script>
-// Tavo Google Sheets nuoroda
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
 async function fetchFromGoogle() {
     try {
-        console.log("Jungiamasi prie Google Sheets...");
         const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
         const data = await response.text();
-        const rows = data.split('\n');
+        const rows = data.split('\n').filter(row => row.trim() !== "");
 
-        // Einame per pirmas 10 eilučių (dažniausiai tiek būna skydelyje)
-        for (let i = 0; i < 10; i++) {
-            const rowText = rows[i] ? rows[i].trim() : "";
-            if (!rowText) continue;
-
-            // Teisingas CSV skaidymas (su kableliais kabutėse)
-            const cols = rowText.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+        rows.forEach((row, index) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             
-            const newName = cols[0] || "";
-            const newInfo = cols[1] || "";
+            // Tikslūs ID, kuriuos matome per Inspect
+            const nameField = document.getElementById(`alt-${index + 1}-name`);
+            const infoField = document.getElementById(`alt-${index + 1}-info`);
 
-            // Ieškome laukelių pagal ID (alt-1-name, alt-2-name ir t.t.)
-            const nameInput = document.getElementById(`alt-${i+1}-name`);
-            const infoInput = document.getElementById(`alt-${i+1}-info`);
-
-            if (nameInput) {
-                // SVARBU: Priverstinai įrašome reikšmę, kad "permuštų" cache
-                nameInput.value = newName;
-                // Jei skydelis turi "change" eventą, jį aktyvuojame
-                nameInput.dispatchEvent(new Event('change')); 
+            if (nameField) {
+                nameField.value = cols[0] || "";
+                // Priverstinai sužadiname visus įvykius, kad autoriaus kodas "pabustų"
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+                nameField.dispatchEvent(new Event('change', { bubbles: true }));
             }
-            if (infoInput) {
-                infoInput.value = newInfo;
-                infoInput.dispatchEvent(new Event('change'));
+            if (infoField) {
+                infoField.value = cols[1] || "";
+                infoField.dispatchEvent(new Event('input', { bubbles: true }));
+                infoField.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        }
-        console.log("Duomenys sėkmingai atnaujinti!");
+        });
+        console.log("Google Sheets duomenys įrašyti į laukelius.");
     } catch (e) {
-        console.error("Klaida siunčiant duomenis:", e);
+        console.error("Klaida:", e);
     }
 }
 
-// Paleidžiame iškart ir tada kas 3 sekundes
-window.addEventListener('load', function() {
-    setTimeout(fetchFromGoogle, 1000); // Maža pauzė, kol užsikraus stiliai
-    setInterval(fetchFromGoogle, 3000); 
-});
+// Paleidžiame po 2 sekundžių (pirmas užkrovimas) ir tada kas 5 sekundes
+setTimeout(fetchFromGoogle, 2000);
+setInterval(fetchFromGoogle, 5000);
 </script>
 
 
