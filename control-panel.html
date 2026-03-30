@@ -3621,11 +3621,11 @@
 
 			settingsTooltips();
 			loadDefaultValues();
-			//loadData();
+			loadData();
 			updateCustomFontList();
 			refreshData();
 			checkSwitches();
-			//saveData();
+			saveData();
 			setInterval(() => checkUpdates(), 200);
 
 			// Wait document to be ready to do some stuff
@@ -3640,7 +3640,7 @@
 <script>
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-async function masterUpdate() {
+async function syncWithGoogle() {
     try {
         const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
         const data = await response.text();
@@ -3649,43 +3649,23 @@ async function masterUpdate() {
         rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
-            const name = cols[0] || "";
-            const info = cols[1] || "";
-
-            // 1. Įrašome į redagavimo laukelius
-            $(`#alt-${i}-name`).val(name);
-            $(`#alt-${i}-info`).val(info);
-            localStorage.setItem(`alt-${i}-name`, name);
-            localStorage.setItem(`alt-${i}-info`, info);
-
-            // 2. BRUTALUS MYGTUKŲ UŽPILDYMAS
-            // Ieškome bet kurio elemento, kuris turi id, susijusį su šiuo numeriu
-            $(`div[id*="slot-name-${i}"]`).text(name);
-            $(`.slot-storable[id="alt-${i}-name"]`).text(name);
-            $(`.slot-storable[id="alt-${i}-info"]`).text(info);
             
-            // Jei mygtukai turi specifinį numerį (1-10) kiekviename šablone
-            for(let t=1; t<=4; t++) {
-                $(`#alt-${t}-slot-name-${i}`).text(name);
-                $(`#alt-${t}-slot-info-${i}`).text(info);
-            }
+            // Įrašome į localStorage (taip, kaip nori autoriaus sistema)
+            if (cols[0]) localStorage.setItem(`alt-${i}-name`, cols[0]);
+            if (cols[1]) localStorage.setItem(`alt-${i}-info`, cols[1]);
         });
 
-        // 3. Priverstinai aktyvuojame mygtukus vizualiai
-        $('.slot-number').css({'background-color': '#444', 'color': 'white', 'cursor': 'pointer'});
-        
-        // Priverstinis siuntimas į OBS, apeinant klaidas
-        if (typeof function_send === "function") {
-            try { function_send(); } catch(e) { console.log("Siuntimas į OBS veikia fone."); }
-        }
+        // VIETOJ TO, KAD PATYS RAŠYTUME Į HTML, SAKOME AUTORIAUS SISTEMAI: "UŽSIKRAUK IŠ NAUJO"
+        if (typeof loadData === "function") loadData(); 
+        if (typeof refreshData === "function") refreshData();
 
-        console.log("!!! UI PERRAŠYTAS SĖKMINGAI !!!");
-    } catch (e) { console.error(e); }
+        console.log("Google Sheets duomenys integruoti į sistemą.");
+    } catch (e) { console.error("Klaida sinchronizuojant:", e); }
 }
 
-// Paleidžiame ir sukam
-setTimeout(masterUpdate, 1500);
-setInterval(masterUpdate, 4000);
+// Paleidžiame sinchronizaciją
+setTimeout(syncWithGoogle, 1000); 
+setInterval(syncWithGoogle, 5000); // Kas 5 sek. tikriname, ar nepasikeitė Sheet'as
 </script>
 
 
