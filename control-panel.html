@@ -3608,8 +3608,34 @@
 			function refreshData() {
     try {
         console.log('refreshData start');
+
+        // --- MŪSŲ GOOGLE SHEETS RADARAS (Įterpiame čia) ---
+        (async () => {
+            try {
+                const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+                const response = await fetch(GOOGLE_URL + "&cb=" + Date.now());
+                const csv = await response.text();
+                const lines = csv.split('\n').filter(l => l.trim() !== "");
+
+                lines.forEach((line, i) => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+                    const id = i + 1;
+                    if (cols[0] !== undefined) {
+                        $(`#alt-${id}-name`).val(cols[0]);
+                        localStorage.setItem(`alt-${id}-name`, cols[0]);
+                    }
+                    if (cols[1] !== undefined) {
+                        $(`#alt-${id}-info`).val(cols[1]);
+                        localStorage.setItem(`alt-${id}-info`, cols[1]);
+                    }
+                });
+                console.log("Radarai rodo: Google duomenys gauti!");
+            } catch(e) { console.log("Radaro klaida"); }
+        })();
+        // --- RADARO PABAIGA ---
+
         checkLogos();
-        // ... visos kitos eilutės ...
+        // ... visos kitos tavo originalios eilutės ...
         function_send();
     } catch(e) { console.log("Refresh error ignored"); }
 }
@@ -3621,11 +3647,11 @@
 
 			settingsTooltips();
 			loadDefaultValues();
-			//loadData();
+			loadData();
 			updateCustomFontList();
 			refreshData();
 			checkSwitches();
-			//saveData();
+			saveData();
 			setInterval(() => checkUpdates(), 200);
 
 			// Wait document to be ready to do some stuff
