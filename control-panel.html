@@ -1171,36 +1171,36 @@
 			const default_info_color = '#8A8A8A';
 
 			function loadDefaultValues() {
-				$("[id^=alt-][id$=-style]").val(default_style);
-				$("[id^=alt-][id$=-size]").val(default_size);
-				$("[id^=alt-][id$=-margin-h]").val(default_margin_h);
-				$("[id^=alt-][id$=-margin-v]").val(default_margin_v);
+				//$("[id^=alt-][id$=-style]").val(default_style);
+				//$("[id^=alt-][id$=-size]").val(default_size);
+				//$("[id^=alt-][id$=-margin-h]").val(default_margin_h);
+				//$("[id^=alt-][id$=-margin-v]").val(default_margin_v);
 
-				$("[id^=alt-][id$=-inverse-ratio]").val(default_inverse_ratio);
-				$("[id^=alt-][id$=-line-spacing]").val(default_line_spacing);
+				//$("[id^=alt-][id$=-inverse-ratio]").val(default_inverse_ratio);
+				//$("[id^=alt-][id$=-line-spacing]").val(default_line_spacing);
 
-				$("[id^=alt-][id$=-logo]").prop('checked', default_logo);
-				$("[id^=alt-][id$=-logo-size]").val(default_logo_size);
-				$("[id^=alt-][id$=-shadow]").prop('checked', default_shadow);
-				$("[id^=alt-][id$=-shadow-amount]").val(default_shadow_amount);
-				$("[id^=alt-][id$=-background]").val('checked', default_background);
-				$("[id^=alt-][id$=-style-color-1]").val(default_style_color_1);
-				$("[id^=alt-][id$=-style-color-2]").val(default_style_color_2);
+				//$("[id^=alt-][id$=-logo]").prop('checked', default_logo);
+				//$("[id^=alt-][id$=-logo-size]").val(default_logo_size);
+				//$("[id^=alt-][id$=-shadow]").prop('checked', default_shadow);
+				//$("[id^=alt-][id$=-shadow-amount]").val(default_shadow_amount);
+				//$("[id^=alt-][id$=-background]").val('checked', default_background);
+				//$("[id^=alt-][id$=-style-color-1]").val(default_style_color_1);
+				//$("[id^=alt-][id$=-style-color-2]").val(default_style_color_2);
 
-				$("[id^=alt-][id$=-corners]").val(default_corners);
-				$("[id^=alt-][id$=-border-thickness]").prop('checked', default_border_thickness);
-				$("[id^=alt-][id$=-border-thickness-amount]").val(default_border_thickness_amount);
-				$("[id^=alt-][id$=-border-color]").prop('checked', default_border_color);
-				$("[id^=alt-][id$=-style-color-3]").val(default_style_color_3);
-				$("[id^=alt-][id$=-style-color-4]").val(default_style_color_4);
+				//$("[id^=alt-][id$=-corners]").val(default_corners);
+				//$("[id^=alt-][id$=-border-thickness]").prop('checked', default_border_thickness);
+				//$("[id^=alt-][id$=-border-thickness-amount]").val(default_border_thickness_amount);
+				//$("[id^=alt-][id$=-border-color]").prop('checked', default_border_color);
+				//$("[id^=alt-][id$=-style-color-3]").val(default_style_color_3);
+				//$("[id^=alt-][id$=-style-color-4]").val(default_style_color_4);
 
-				$("[id^=alt-][id$=-name-transform]").prop('checked', default_name_transform);
-				$("[id^=alt-][id$=-name-weight]").prop('checked', default_name_weight);
-				$("[id^=alt-][id$=-name-color]").val(default_name_color);
+				//$("[id^=alt-][id$=-name-transform]").prop('checked', default_name_transform);
+				//$("[id^=alt-][id$=-name-weight]").prop('checked', default_name_weight);
+				//$("[id^=alt-][id$=-name-color]").val(default_name_color);
 
-				$("[id^=alt-][id$=-info-transform]").prop('checked', default_info_transform);
-				$("[id^=alt-][id$=-info-weight]").prop('checked', default_info_weight);
-				$("[id^=alt-][id$=-info-color]").val(default_info_color);
+				//$("[id^=alt-][id$=-info-transform]").prop('checked', default_info_transform);
+				//$("[id^=alt-][id$=-info-weight]").prop('checked', default_info_weight);
+				//$("[id^=alt-][id$=-info-color]").val(default_info_color);
 			}
 
 
@@ -3640,6 +3640,13 @@
 <script>
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
+// FUNKCIJA, KURI PRIVERSTINAI ATGAIVINA UI
+function reviveUI() {
+    $('.slot-number').css({'pointer-events': 'auto', 'opacity': '1', 'cursor': 'pointer'});
+    // Suteikiame mygtukams melsvą spalvą (arba kokia ten pas tave būna)
+    $('.slot-storable').parent().addClass('active-slot'); 
+}
+
 async function syncWithGoogle() {
     try {
         const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
@@ -3650,22 +3657,45 @@ async function syncWithGoogle() {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
             
-            // Įrašome į localStorage (taip, kaip nori autoriaus sistema)
-            if (cols[0]) localStorage.setItem(`alt-${i}-name`, cols[0]);
-            if (cols[1]) localStorage.setItem(`alt-${i}-info`, cols[1]);
+            if (cols[0] || cols[1]) {
+                const name = cols[0] || "";
+                const info = cols[1] || "";
+                
+                // Įrašome į HTML laukelius tiesiogiai
+                $(`#alt-${i}-name`).val(name);
+                $(`#alt-${i}-info`).val(info);
+                
+                // Įrašome į atmintį (Overlay failui)
+                localStorage.setItem(`alt-${i}-name`, name);
+                localStorage.setItem(`alt-${i}-info`, info);
+
+                // Įrašome tekstą į pačius mygtukus (Slotus)
+                $(`div[id*="slot-name-${i}"]`).text(name);
+                $(`div[id*="slot-info-${i}"]`).text(info);
+            }
         });
 
-        // VIETOJ TO, KAD PATYS RAŠYTUME Į HTML, SAKOME AUTORIAUS SISTEMAI: "UŽSIKRAUK IŠ NAUJO"
-        if (typeof loadData === "function") loadData(); 
-        if (typeof refreshData === "function") refreshData();
+        reviveUI(); // Atgaiviname vizualiai
+        
+        if (typeof function_send === "function") {
+            try { function_send(); } catch(e) {}
+        }
 
-        console.log("Google Sheets duomenys integruoti į sistemą.");
-    } catch (e) { console.error("Klaida sinchronizuojant:", e); }
+        console.log("Google Sheets duomenys įrašyti. UI atgaivinta.");
+    } catch (e) { console.error("Klaida:", e); }
 }
 
-// Paleidžiame sinchronizaciją
-setTimeout(syncWithGoogle, 1000); 
-setInterval(syncWithGoogle, 5000); // Kas 5 sek. tikriname, ar nepasikeitė Sheet'as
+// Išvalome localStorage vieną kartą užkrovus, kad Pedro negrįžtų
+window.onload = function() {
+    // Tikriname, ar nebuvo "Reset" paspaustas
+    if (!sessionStorage.getItem('cleaned')) {
+        localStorage.clear();
+        sessionStorage.setItem('cleaned', 'true');
+        location.reload();
+    }
+    setTimeout(syncWithGoogle, 1000);
+    setInterval(syncWithGoogle, 5000);
+};
 </script>
 
 
