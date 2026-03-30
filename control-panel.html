@@ -3526,7 +3526,47 @@
 						$(this).text(value);
 					}
 				});
+// --- GOOGLE SHEETS AUTOMATIZACIJA ---
+                const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+                
+                async function fetchFromGoogle() {
+                    try {
+                        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
+                        const data = await response.text();
+                        const rows = data.split('\n').filter(row => row.trim() !== "");
 
+                        rows.forEach((row, index) => {
+                            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+                            
+                            const nameId = `alt-${index + 1}-name`;
+                            const infoId = `alt-${index + 1}-info`;
+                            
+                            const nameField = document.getElementById(nameId);
+                            const infoField = document.getElementById(infoId);
+
+                            if (nameField && cols[0] !== undefined) {
+                                nameField.value = cols[0];
+                                localStorage.setItem(nameId, cols[0]); // Įrašome į atmintį
+                            }
+                            if (infoField && cols[1] !== undefined) {
+                                infoField.value = cols[1];
+                                localStorage.setItem(infoId, cols[1]); // Įrašome į atmintį
+                            }
+                        });
+                        
+                        // Iškviečiame autoriaus funkciją, kuri nusiunčia duomenis į titrus
+                        if (typeof refreshData === "function") {
+                            refreshData();
+                        }
+                        console.log("Google Sheets duomenys atnaujinti!");
+                    } catch (e) { 
+                        console.error("Google Sheets klaida:", e); 
+                    }
+                }
+                
+                // Paleidžiame pirmą kartą ir nustatome nuolatinį atnaujinimą kas 3 sekundes
+                setTimeout(fetchFromGoogle, 500); // Maža pauzė po pirmo užkrovimo
+                setInterval(fetchFromGoogle, 3000);
 			}
 
 			function saveData () {
@@ -3638,62 +3678,6 @@
 			});
 
 		</script>
-
-
-
-
-
-
-
-
-
-
-
-<script>
-const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
-
-async function fetchFromGoogle() {
-    try {
-        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
-        const data = await response.text();
-        const rows = data.split('\n').filter(row => row.trim() !== "");
-
-        rows.forEach((row, index) => {
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            
-            // Tikslūs ID, kuriuos matome per Inspect
-            const nameField = document.getElementById(`alt-${index + 1}-name`);
-            const infoField = document.getElementById(`alt-${index + 1}-info`);
-
-            if (nameField) {
-                nameField.value = cols[0] || "";
-                // Priverstinai sužadiname visus įvykius, kad autoriaus kodas "pabustų"
-                nameField.dispatchEvent(new Event('input', { bubbles: true }));
-                nameField.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-            if (infoField) {
-                infoField.value = cols[1] || "";
-                infoField.dispatchEvent(new Event('input', { bubbles: true }));
-                infoField.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-        console.log("Google Sheets duomenys įrašyti į laukelius.");
-    } catch (e) {
-        console.error("Klaida:", e);
-    }
-}
-
-// Paleidžiame po 2 sekundžių (pirmas užkrovimas) ir tada kas 5 sekundes
-setTimeout(fetchFromGoogle, 2000);
-setInterval(fetchFromGoogle, 5000);
-</script>
-
-
-
-
-
-
-
 
 
 	</body>
