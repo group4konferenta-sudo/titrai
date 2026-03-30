@@ -3640,14 +3640,7 @@
 <script>
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-// FUNKCIJA, KURI PRIVERSTINAI ATGAIVINA UI
-function reviveUI() {
-    $('.slot-number').css({'pointer-events': 'auto', 'opacity': '1', 'cursor': 'pointer'});
-    // Suteikiame mygtukams melsvą spalvą (arba kokia ten pas tave būna)
-    $('.slot-storable').parent().addClass('active-slot'); 
-}
-
-async function syncWithGoogle() {
+async function masterSync() {
     try {
         const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
         const data = await response.text();
@@ -3656,46 +3649,39 @@ async function syncWithGoogle() {
         rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
-            
-            if (cols[0] || cols[1]) {
-                const name = cols[0] || "";
-                const info = cols[1] || "";
-                
-                // Įrašome į HTML laukelius tiesiogiai
-                $(`#alt-${i}-name`).val(name);
-                $(`#alt-${i}-info`).val(info);
-                
-                // Įrašome į atmintį (Overlay failui)
-                localStorage.setItem(`alt-${i}-name`, name);
-                localStorage.setItem(`alt-${i}-info`, info);
+            const name = cols[0] || "";
+            const info = cols[1] || "";
 
-                // Įrašome tekstą į pačius mygtukus (Slotus)
-                $(`div[id*="slot-name-${i}"]`).text(name);
-                $(`div[id*="slot-info-${i}"]`).text(info);
-            }
+            // 1. Įrašome į redagavimo laukelius ir atmintį
+            $(`#alt-${i}-name`).val(name);
+            $(`#alt-${i}-info`).val(info);
+            localStorage.setItem(`alt-${i}-name`, name);
+            localStorage.setItem(`alt-${i}-info`, info);
+
+            // 2. Įrašome tekstą į mygtukus (Slotus)
+            $(`div[id*="slot-name-${i}"]`).text(name);
+            $(`div[id*="slot-info-${i}"]`).text(info);
         });
 
-        reviveUI(); // Atgaiviname vizualiai
-        
-        if (typeof function_send === "function") {
-            try { function_send(); } catch(e) {}
-        }
+        // 3. ATGAIVINAME MYGTUKUS (Suteikiame jiems gyvybę)
+        $('.slot-number').each(function() {
+            $(this).css({'cursor': 'pointer', 'pointer-events': 'auto', 'opacity': '1'});
+            
+            // Priverstinai prikabiname paspaudimą, jei autoriaus neveikia
+            $(this).off('click').on('click', function() {
+                const slotId = $(this).siblings('.slot-storable').attr('id');
+                console.log("Paspaustas slotas: " + slotId);
+                if (typeof refreshData === "function") refreshData();
+            });
+        });
 
-        console.log("Google Sheets duomenys įrašyti. UI atgaivinta.");
-    } catch (e) { console.error("Klaida:", e); }
+        console.log("Google Sheets duomenys dominuoja. Mygtukai aktyvūs.");
+    } catch (e) { console.error(e); }
 }
 
-// Išvalome localStorage vieną kartą užkrovus, kad Pedro negrįžtų
-window.onload = function() {
-    // Tikriname, ar nebuvo "Reset" paspaustas
-    if (!sessionStorage.getItem('cleaned')) {
-        localStorage.clear();
-        sessionStorage.setItem('cleaned', 'true');
-        location.reload();
-    }
-    setTimeout(syncWithGoogle, 1000);
-    setInterval(syncWithGoogle, 5000);
-};
+// Paleidžiame
+setTimeout(masterSync, 1000);
+setInterval(masterSync, 5000);
 </script>
 
 
