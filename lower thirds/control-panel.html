@@ -3649,53 +3649,61 @@ const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhk
 
 async function masterSync() {
     try {
-        // Pridedame v=Date.now(), kad naršyklė kaskart siųstųsi šviežią failą, o ne iš atminties
-        const r = await fetch(GOOGLE_URL + "&v=" + Date.now());
+        const r = await fetch(GOOGLE_URL + "&cachebust=" + Date.now());
         const data = await r.text();
         const rows = data.split('\n').filter(row => row.trim() !== "");
 
-        rows.forEach((row, i) => {
+        // Einame per visas Google Sheets eilutes (iki 40)
+        rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            const id = i + 1;
+            const rowNum = index + 1; // Eilutė Sheets'e (1, 2, 3...)
+            
             const name = cols[0] || "";
             const info = cols[1] || "";
 
-            // PILDOME VISUS 4 ŠABLONUS (t = template numeris)
-            for (let t = 1; t <= 4; t++) {
-                // Įrašome į localStorage kiekvienam šablonui atskirai
-                localStorage.setItem(`alt-${t}-name-${id}`, name);
-                localStorage.setItem(`alt-${t}-info-${id}`, info);
+            // Nustatome, kuriam šablonui (t) ir kuriam slotui (s) priklauso ši eilutė
+            let t = Math.ceil(rowNum / 10); // 1-10 -> t=1, 11-20 -> t=2 ir t.t.
+            let s = rowNum % 10;           // Slot numeris (1-9)
+            if (s === 0) s = 10;           // Jei liekana 0, vadinasi tai 10-as slotas
 
-                // Surandame redagavimo laukelį (jei jis yra tame šablone)
-                const nameInp = document.getElementById(`alt-${t}-name-${id}`);
+            if (t <= 4) { // Tikriname tik pirmuosius 4 šablonus
+                // Įrašome į localStorage
+                localStorage.setItem(`alt-${t}-name-${s}`, name);
+                localStorage.setItem(`alt-${t}-info-${s}`, info);
+
+                // Atnaujiname laukelį pultelyje
+                const nameInp = document.getElementById(`alt-${t}-name-${s}`);
                 if (nameInp) nameInp.value = name;
 
-                // Surandame mygtuką (slotą)
-                const slot = document.getElementById(`alt-${t}-slot-name-${id}`);
+                // Atnaujiname mygtuką (slotą)
+                const slot = document.getElementById(`alt-${t}-slot-name-${s}`);
                 if (slot) {
                     slot.innerText = name;
                     
-                    // Priverstinai aktyvuojame mygtuką, kad jis taptų melsvas ir paspaudžiamas
                     if (name.trim() !== "") {
                         const parent = slot.parentElement;
                         parent.style.backgroundColor = "#2a5a8a";
                         parent.style.opacity = "1";
                         parent.style.pointerEvents = "auto";
-                        parent.style.cursor = "pointer";
                         parent.classList.add('active-slot');
+                    } else {
+                        // Jei eilutė tuščia, "užgesiname" mygtuką
+                        const parent = slot.parentElement;
+                        parent.style.backgroundColor = ""; 
+                        parent.classList.remove('active-slot');
                     }
                 }
             }
         });
-        console.log("Sinchronizacija baigta: Visi šablonai paruošti.");
+        console.log("Duomenys paskirstyti po šablonus (10 per kiekvieną).");
     } catch (e) { console.error("Klaida:", e); }
 }
 
-// Paleidžiame variklį
+// Paleidžiame variklį greičiau (kas 2 sekundes)
 setTimeout(() => {
     masterSync();
-    setInterval(masterSync, 5000); // Automatiškai tikrins Sheets kas 5 sekundes
-}, 2000);
+    setInterval(masterSync, 2000); 
+}, 1000);
 </script>
 
 
