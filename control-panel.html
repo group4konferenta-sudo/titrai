@@ -3526,40 +3526,56 @@
 						$(this).text(value);
 					}
 				});
-// --- GOOGLE SHEETS "STALINAS" (PERRAŠO VISKĄ) ---
+// --- PRIESTATYMO VARIKLIS (FORCE OVERRIDE) ---
 const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-async function fetchFromGoogle() {
+async function forceUpdateFromGoogle() {
     try {
         const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
         const data = await response.text();
         const rows = data.split('\n').filter(row => row.trim() !== "");
 
+        // Einame per visas tavo lentelės eilutes
         rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
 
-            // Naudojame jQuery ($), nes autorius jį naudoja
-            if (cols[0]) {
-                $(`#alt-${i}-name`).val(cols[0]).trigger('input').trigger('change');
-                localStorage.setItem(`alt-${i}-name`, cols[0]);
+            // Surandame laukelius tiesiogiai per DOM
+            const nameEl = document.getElementById(`alt-${i}-name`);
+            const infoEl = document.getElementById(`alt-${i}-info`);
+
+            if (nameEl && cols[0] !== undefined) {
+                // Jei dabartinė reikšmė skiriasi nuo tos, kurią gavome iš Google
+                if (nameEl.value !== cols[0]) {
+                    nameEl.value = cols[0];
+                    // Rankiniu būdu įrašome į atmintį, kad nebūtų "Pedro" po perkrovimo
+                    localStorage.setItem(`alt-${i}-name`, cols[0]);
+                    // Išsiunčiame signalą, kad OBS matytų pasikeitimą
+                    nameEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             }
-            if (cols[1]) {
-                $(`#alt-${i}-info`).val(cols[1]).trigger('input').trigger('change');
-                localStorage.setItem(`alt-${i}-info`, cols[1]);
+            if (infoEl && cols[1] !== undefined) {
+                if (infoEl.value !== cols[1]) {
+                    infoEl.value = cols[1];
+                    localStorage.setItem(`alt-${i}-info`, cols[1]);
+                    infoEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             }
         });
         
-        // Priverstinai paleidžiame autoriaus "refreshData"
-        if (typeof refreshData === "function") refreshData();
-        
-        console.log("Sėkmė: Laukeliai užpildyti priverstinai!");
+        // Jei autoriaus refreshData vis dar veikia, jį pajudiname
+        if (typeof refreshData === "function") {
+            try { refreshData(); } catch(e) {}
+        }
+        console.log("Atnaujinimas įvykdytas: " + new Date().toLocaleTimeString());
     } catch (e) { console.error("Klaida:", e); }
 }
 
-// Paleidžiame po 3 sekundžių pauzės, kad "Reset" ir "Load" procesai pasibaigtų
-setTimeout(fetchFromGoogle, 3000);
-setInterval(fetchFromGoogle, 5000);
+// Paleidžiame agresyvų ciklą
+setTimeout(() => {
+    forceUpdateFromGoogle();
+    setInterval(forceUpdateFromGoogle, 2000); // Tikriname kas 2 sekundes
+}, 1000);
 			}
 
 			function saveData () {
