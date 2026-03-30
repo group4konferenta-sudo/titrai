@@ -3526,56 +3526,6 @@
 						$(this).text(value);
 					}
 				});
-// --- PRIESTATYMO VARIKLIS (FORCE OVERRIDE) ---
-const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
-
-async function forceUpdateFromGoogle() {
-    try {
-        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
-        const data = await response.text();
-        const rows = data.split('\n').filter(row => row.trim() !== "");
-
-        // Einame per visas tavo lentelės eilutes
-        rows.forEach((row, index) => {
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            const i = index + 1;
-
-            // Surandame laukelius tiesiogiai per DOM
-            const nameEl = document.getElementById(`alt-${i}-name`);
-            const infoEl = document.getElementById(`alt-${i}-info`);
-
-            if (nameEl && cols[0] !== undefined) {
-                // Jei dabartinė reikšmė skiriasi nuo tos, kurią gavome iš Google
-                if (nameEl.value !== cols[0]) {
-                    nameEl.value = cols[0];
-                    // Rankiniu būdu įrašome į atmintį, kad nebūtų "Pedro" po perkrovimo
-                    localStorage.setItem(`alt-${i}-name`, cols[0]);
-                    // Išsiunčiame signalą, kad OBS matytų pasikeitimą
-                    nameEl.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-            }
-            if (infoEl && cols[1] !== undefined) {
-                if (infoEl.value !== cols[1]) {
-                    infoEl.value = cols[1];
-                    localStorage.setItem(`alt-${i}-info`, cols[1]);
-                    infoEl.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-            }
-        });
-        
-        // Jei autoriaus refreshData vis dar veikia, jį pajudiname
-        if (typeof refreshData === "function") {
-            try { refreshData(); } catch(e) {}
-        }
-        console.log("Atnaujinimas įvykdytas: " + new Date().toLocaleTimeString());
-    } catch (e) { console.error("Klaida:", e); }
-}
-
-// Paleidžiame agresyvų ciklą
-setTimeout(() => {
-    forceUpdateFromGoogle();
-    setInterval(forceUpdateFromGoogle, 2000); // Tikriname kas 2 sekundes
-}, 1000);
 			}
 
 			function saveData () {
@@ -3656,16 +3606,13 @@ setTimeout(() => {
 			}
 
 			function refreshData() {
-				console.log('refreshData');
-				checkLogos();
-				checkSlots("#alt-1-memory-slots", "#alt-1-name", "#alt-1-info", "#alt-1-logo-preview");
-				checkSlots("#alt-2-memory-slots", "#alt-2-name", "#alt-2-info", "#alt-2-logo-preview");
-				checkSlots("#alt-3-memory-slots", "#alt-3-name", "#alt-3-info", "#alt-3-logo-preview");
-				checkSlots("#alt-4-memory-slots", "#alt-4-name", "#alt-4-info", "#alt-4-logo-preview");
-				getAppearance();
-				checkSwitches();
-				function_send();
-			}
+    try {
+        console.log('refreshData start');
+        checkLogos();
+        // ... visos kitos eilutės ...
+        function_send();
+    } catch(e) { console.log("Refresh error ignored"); }
+}
 
 			function checkUpdates() {
 				checkHotkeys();
@@ -3674,11 +3621,11 @@ setTimeout(() => {
 
 			settingsTooltips();
 			loadDefaultValues();
-			loadData();
+			//loadData();
 			updateCustomFontList();
 			refreshData();
 			checkSwitches();
-			saveData();
+			//saveData();
 			setInterval(() => checkUpdates(), 200);
 
 			// Wait document to be ready to do some stuff
@@ -3687,6 +3634,43 @@ setTimeout(() => {
 			});
 
 		</script>
+
+
+
+<script>
+const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+
+async function masterUpdate() {
+    try {
+        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
+        const data = await response.text();
+        const rows = data.split('\n').filter(r => r.trim() !== "");
+
+        rows.forEach((row, index) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            const i = index + 1;
+
+            // Priverstinis įrašymas į visus įmanomus laukus
+            $(`#alt-${i}-name`).val(cols[0]);
+            $(`#alt-${i}-info`).val(cols[1]);
+            
+            // Įrašome į atmintį, kad titrai (overlay) matytų duomenis
+            localStorage.setItem(`alt-${i}-name`, cols[0]);
+            localStorage.setItem(`alt-${i}-info`, cols[1]);
+        });
+
+        // Rankiniu būdu iškviečiame duomenų išsiuntimą į OBS
+        if (typeof function_send === "function") function_send();
+        
+        console.log("Google Sheets duomenys dominuoja!");
+    } catch (e) { console.error(e); }
+}
+
+// Paleidžiame agresyviai
+setInterval(masterUpdate, 2000);
+</script>
+
+
 
 
 	</body>
