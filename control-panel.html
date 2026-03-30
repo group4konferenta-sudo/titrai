@@ -1171,36 +1171,36 @@
 			const default_info_color = '#8A8A8A';
 
 			function loadDefaultValues() {
-				//$("[id^=alt-][id$=-style]").val(default_style);
-				//$("[id^=alt-][id$=-size]").val(default_size);
-				//$("[id^=alt-][id$=-margin-h]").val(default_margin_h);
-				//$("[id^=alt-][id$=-margin-v]").val(default_margin_v);
+				$("[id^=alt-][id$=-style]").val(default_style);
+				$("[id^=alt-][id$=-size]").val(default_size);
+				$("[id^=alt-][id$=-margin-h]").val(default_margin_h);
+				$("[id^=alt-][id$=-margin-v]").val(default_margin_v);
 
-				//$("[id^=alt-][id$=-inverse-ratio]").val(default_inverse_ratio);
-				//$("[id^=alt-][id$=-line-spacing]").val(default_line_spacing);
+				$("[id^=alt-][id$=-inverse-ratio]").val(default_inverse_ratio);
+				$("[id^=alt-][id$=-line-spacing]").val(default_line_spacing);
 
-				//$("[id^=alt-][id$=-logo]").prop('checked', default_logo);
-				//$("[id^=alt-][id$=-logo-size]").val(default_logo_size);
-				//$("[id^=alt-][id$=-shadow]").prop('checked', default_shadow);
-				//$("[id^=alt-][id$=-shadow-amount]").val(default_shadow_amount);
-				//$("[id^=alt-][id$=-background]").val('checked', default_background);
-				//$("[id^=alt-][id$=-style-color-1]").val(default_style_color_1);
-				//$("[id^=alt-][id$=-style-color-2]").val(default_style_color_2);
+				$("[id^=alt-][id$=-logo]").prop('checked', default_logo);
+				$("[id^=alt-][id$=-logo-size]").val(default_logo_size);
+				$("[id^=alt-][id$=-shadow]").prop('checked', default_shadow);
+				$("[id^=alt-][id$=-shadow-amount]").val(default_shadow_amount);
+				$("[id^=alt-][id$=-background]").val('checked', default_background);
+				$("[id^=alt-][id$=-style-color-1]").val(default_style_color_1);
+				$("[id^=alt-][id$=-style-color-2]").val(default_style_color_2);
 
-				//$("[id^=alt-][id$=-corners]").val(default_corners);
-				//$("[id^=alt-][id$=-border-thickness]").prop('checked', default_border_thickness);
-				//$("[id^=alt-][id$=-border-thickness-amount]").val(default_border_thickness_amount);
-				//$("[id^=alt-][id$=-border-color]").prop('checked', default_border_color);
-				//$("[id^=alt-][id$=-style-color-3]").val(default_style_color_3);
-				//$("[id^=alt-][id$=-style-color-4]").val(default_style_color_4);
+				$("[id^=alt-][id$=-corners]").val(default_corners);
+				$("[id^=alt-][id$=-border-thickness]").prop('checked', default_border_thickness);
+				$("[id^=alt-][id$=-border-thickness-amount]").val(default_border_thickness_amount);
+				$("[id^=alt-][id$=-border-color]").prop('checked', default_border_color);
+				$("[id^=alt-][id$=-style-color-3]").val(default_style_color_3);
+				$("[id^=alt-][id$=-style-color-4]").val(default_style_color_4);
 
-				//$("[id^=alt-][id$=-name-transform]").prop('checked', default_name_transform);
-				//$("[id^=alt-][id$=-name-weight]").prop('checked', default_name_weight);
-				//$("[id^=alt-][id$=-name-color]").val(default_name_color);
+				$("[id^=alt-][id$=-name-transform]").prop('checked', default_name_transform);
+				$("[id^=alt-][id$=-name-weight]").prop('checked', default_name_weight);
+				$("[id^=alt-][id$=-name-color]").val(default_name_color);
 
-				//$("[id^=alt-][id$=-info-transform]").prop('checked', default_info_transform);
-				//$("[id^=alt-][id$=-info-weight]").prop('checked', default_info_weight);
-				//$("[id^=alt-][id$=-info-color]").val(default_info_color);
+				$("[id^=alt-][id$=-info-transform]").prop('checked', default_info_transform);
+				$("[id^=alt-][id$=-info-weight]").prop('checked', default_info_weight);
+				$("[id^=alt-][id$=-info-color]").val(default_info_color);
 			}
 
 
@@ -3526,6 +3526,7 @@
 						$(this).text(value);
 					}
 				});
+
 			}
 
 			function saveData () {
@@ -3606,39 +3607,16 @@
 			}
 
 			function refreshData() {
-    try {
-        console.log('refreshData start');
-
-        // --- MŪSŲ GOOGLE SHEETS RADARAS (Įterpiame čia) ---
-        (async () => {
-            try {
-                const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
-                const response = await fetch(GOOGLE_URL + "&cb=" + Date.now());
-                const csv = await response.text();
-                const lines = csv.split('\n').filter(l => l.trim() !== "");
-
-                lines.forEach((line, i) => {
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-                    const id = i + 1;
-                    if (cols[0] !== undefined) {
-                        $(`#alt-${id}-name`).val(cols[0]);
-                        localStorage.setItem(`alt-${id}-name`, cols[0]);
-                    }
-                    if (cols[1] !== undefined) {
-                        $(`#alt-${id}-info`).val(cols[1]);
-                        localStorage.setItem(`alt-${id}-info`, cols[1]);
-                    }
-                });
-                console.log("Radarai rodo: Google duomenys gauti!");
-            } catch(e) { console.log("Radaro klaida"); }
-        })();
-        // --- RADARO PABAIGA ---
-
-        checkLogos();
-        // ... visos kitos tavo originalios eilutės ...
-        function_send();
-    } catch(e) { console.log("Refresh error ignored"); }
-}
+				console.log('refreshData');
+				checkLogos();
+				checkSlots("#alt-1-memory-slots", "#alt-1-name", "#alt-1-info", "#alt-1-logo-preview");
+				checkSlots("#alt-2-memory-slots", "#alt-2-name", "#alt-2-info", "#alt-2-logo-preview");
+				checkSlots("#alt-3-memory-slots", "#alt-3-name", "#alt-3-info", "#alt-3-logo-preview");
+				checkSlots("#alt-4-memory-slots", "#alt-4-name", "#alt-4-info", "#alt-4-logo-preview");
+				getAppearance();
+				checkSwitches();
+				function_send();
+			}
 
 			function checkUpdates() {
 				checkHotkeys();
@@ -3662,6 +3640,59 @@
 		</script>
 
 
+
+
+
+<script>
+// --- GOOGLE SHEETS TIESIOGINIS VARIKLIS ---
+const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+
+async function runGoogleUpdate() {
+    try {
+        const r = await fetch(GOOGLE_URL + "&cb=" + Date.now());
+        const data = await r.text();
+        const rows = data.split('\n').filter(row => row.trim() !== "");
+
+        rows.forEach((row, i) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            const id = i + 1;
+            
+            const name = cols[0] || "";
+            const info = cols[1] || "";
+
+            // 1. Įrašome į naršyklės atmintį (Overlay failui)
+            localStorage.setItem(`alt-${id}-name`, name);
+            localStorage.setItem(`alt-${id}-info`, info);
+
+            // 2. Įrašome į redagavimo laukelius (kad matytum pultelyje)
+            const nameInp = document.getElementById(`alt-${id}-name`);
+            const infoInp = document.getElementById(`alt-${id}-info`);
+            if (nameInp) nameInp.value = name;
+            if (infoInp) infoInp.value = info;
+
+            // 3. Įrašome tekstą į pačius mygtukus (Slotus)
+            // Ieškome visų elementų, kurie turi ID su "slot-name-X"
+            document.querySelectorAll(`[id*="slot-name-${id}"]`).forEach(el => { el.innerText = name; });
+            document.querySelectorAll(`[id*="slot-info-${id}"]`).forEach(el => { el.innerText = info; });
+        });
+
+        // 4. Priverstinai aktyvuojame mygtukus (nuimame "negyvumą")
+        document.querySelectorAll('.slot-number').forEach(btn => {
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        });
+
+        console.log("Google duomenys įrašyti sėkmingai!");
+    } catch (e) { console.error("Klaida:", e); }
+}
+
+// Paleidžiame variklį po 2 sekundžių, kai autoriaus kodas baigia krautis
+setTimeout(() => {
+    runGoogleUpdate();
+    setInterval(runGoogleUpdate, 5000); // Atnaujiname kas 5 sek.
+}, 2000);
+</script>
 
 
 
