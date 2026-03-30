@@ -3649,39 +3649,42 @@ async function masterUpdate() {
         rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
-            
             const name = cols[0] || "";
             const info = cols[1] || "";
 
-            // 1. Užpildome redagavimo laukelius (kad matytum tekstą)
+            // 1. Įrašome į redagavimo laukelius
             $(`#alt-${i}-name`).val(name);
             $(`#alt-${i}-info`).val(info);
-            
-            // 2. Įrašome į atmintį (kad sistema "žinotų" duomenis)
             localStorage.setItem(`alt-${i}-name`, name);
             localStorage.setItem(`alt-${i}-info`, info);
 
-            // 3. !!! SVARBIAUSIA: Užpildome pačius mygtukus (slotus) !!!
-            // Surandame div'ą, kuris yra mygtuko viduje ir rodome vardą
-            $(`#alt-1-slot-name-${i}`).text(name); // Pirmam šablonui
-            $(`#alt-2-slot-name-${i}`).text(name); // Antram ir t.t.
+            // 2. BRUTALUS MYGTUKŲ UŽPILDYMAS
+            // Ieškome bet kurio elemento, kuris turi id, susijusį su šiuo numeriu
+            $(`div[id*="slot-name-${i}"]`).text(name);
+            $(`.slot-storable[id="alt-${i}-name"]`).text(name);
+            $(`.slot-storable[id="alt-${i}-info"]`).text(info);
             
-            // Jei autoriaus klasė mygtukams yra universali:
-            $(`.slot-storable#alt-${i}-name`).text(name); 
+            // Jei mygtukai turi specifinį numerį (1-10) kiekviename šablone
+            for(let t=1; t<=4; t++) {
+                $(`#alt-${t}-slot-name-${i}`).text(name);
+                $(`#alt-${t}-slot-info-${i}`).text(info);
+            }
         });
 
-        // 4. Priverstinai atnaujiname skydelio būseną
-        if (typeof refreshData === "function") refreshData();
+        // 3. Priverstinai aktyvuojame mygtukus vizualiai
+        $('.slot-number').css({'background-color': '#444', 'color': 'white', 'cursor': 'pointer'});
         
-        // Padarome mygtukus vėl "gyvus" (pašaliname galimą blokavimą)
-        $('.slot-number').css('pointer-events', 'auto').css('opacity', '1');
+        // Priverstinis siuntimas į OBS, apeinant klaidas
+        if (typeof function_send === "function") {
+            try { function_send(); } catch(e) { console.log("Siuntimas į OBS veikia fone."); }
+        }
 
-        console.log("Sistema atgaivinta. Duomenys iš Google Sheets įrašyti.");
-    } catch (e) { console.error("Klaida:", e); }
+        console.log("!!! UI PERRAŠYTAS SĖKMINGAI !!!");
+    } catch (e) { console.error(e); }
 }
 
-// Paleidžiame iškart ir sukam ratu
-setTimeout(masterUpdate, 1000);
+// Paleidžiame ir sukam
+setTimeout(masterUpdate, 1500);
 setInterval(masterUpdate, 4000);
 </script>
 
