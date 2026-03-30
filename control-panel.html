@@ -3649,25 +3649,40 @@ async function masterUpdate() {
         rows.forEach((row, index) => {
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
             const i = index + 1;
-
-            // Priverstinis įrašymas į visus įmanomus laukus
-            $(`#alt-${i}-name`).val(cols[0]);
-            $(`#alt-${i}-info`).val(cols[1]);
             
-            // Įrašome į atmintį, kad titrai (overlay) matytų duomenis
-            localStorage.setItem(`alt-${i}-name`, cols[0]);
-            localStorage.setItem(`alt-${i}-info`, cols[1]);
+            const name = cols[0] || "";
+            const info = cols[1] || "";
+
+            // 1. Užpildome redagavimo laukelius (kad matytum tekstą)
+            $(`#alt-${i}-name`).val(name);
+            $(`#alt-${i}-info`).val(info);
+            
+            // 2. Įrašome į atmintį (kad sistema "žinotų" duomenis)
+            localStorage.setItem(`alt-${i}-name`, name);
+            localStorage.setItem(`alt-${i}-info`, info);
+
+            // 3. !!! SVARBIAUSIA: Užpildome pačius mygtukus (slotus) !!!
+            // Surandame div'ą, kuris yra mygtuko viduje ir rodome vardą
+            $(`#alt-1-slot-name-${i}`).text(name); // Pirmam šablonui
+            $(`#alt-2-slot-name-${i}`).text(name); // Antram ir t.t.
+            
+            // Jei autoriaus klasė mygtukams yra universali:
+            $(`.slot-storable#alt-${i}-name`).text(name); 
         });
 
-        // Rankiniu būdu iškviečiame duomenų išsiuntimą į OBS
-        if (typeof function_send === "function") function_send();
+        // 4. Priverstinai atnaujiname skydelio būseną
+        if (typeof refreshData === "function") refreshData();
         
-        console.log("Google Sheets duomenys dominuoja!");
-    } catch (e) { console.error(e); }
+        // Padarome mygtukus vėl "gyvus" (pašaliname galimą blokavimą)
+        $('.slot-number').css('pointer-events', 'auto').css('opacity', '1');
+
+        console.log("Sistema atgaivinta. Duomenys iš Google Sheets įrašyti.");
+    } catch (e) { console.error("Klaida:", e); }
 }
 
-// Paleidžiame agresyviai
-setInterval(masterUpdate, 2000);
+// Paleidžiame iškart ir sukam ratu
+setTimeout(masterUpdate, 1000);
+setInterval(masterUpdate, 4000);
 </script>
 
 
