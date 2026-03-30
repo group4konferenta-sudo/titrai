@@ -7,12 +7,12 @@
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<title>Lower Thirds Control Panel</title>
-		<link rel="stylesheet" href="common/css/style-control_panel.css">
-		<link rel="stylesheet" href="common/css/cp-icons.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script src="common/js/jscolor.js"></script>
-<script src="common/js/hotkeys.js"></script>
+		<link rel="stylesheet" href="../common/css/style-control_panel.css">
+		<link rel="stylesheet" href="../common/css/cp-icons.css">
+		<script src="../common/js/jquery.js"></script>
+		<script src="../common/js/jscolor.js"></script>
+		<script src="../common/js/hotkeys.js"></script>
+		<script src="../common/js/jquery-ui.js"></script>
 	</head>
 	<body class="lower-thirds-panel panel">
 		<div id="alt-panel" class="static-panel-top" style="margin-bottom: 0px">
@@ -1125,7 +1125,7 @@
 				<label><div class="icon icon-search"></div></label>
 				<div id="toggle-preview" class="active"><div class="icon icon-chevron-down"></div></div>
 				<div class="embed-container">
-				    <iframe id="myiframe" src="browser-source.html?mode=preview" frameborder="0" allowfullscreen></iframe>
+				    <iframe id="myiframe" src="./browser-source.html?mode=preview" frameborder="0" allowfullscreen></iframe>
 				</div>
 			</div>
 
@@ -1249,10 +1249,10 @@
 			var alt_3_lock_active;
 			var alt_4_lock_active;
 
-			var alt_1_logo_default = "logos/logo_1.png";
-			var alt_2_logo_default = "logos/logo_2.png";
-			var alt_3_logo_default = "logos/logo_3.png";
-			var alt_4_logo_default = "logos/logo_4.png";
+			var alt_1_logo_default = "../logos/logo_1.png";
+			var alt_2_logo_default = "../logos/logo_2.png";
+			var alt_3_logo_default = "../logos/logo_3.png";
+			var alt_4_logo_default = "../logos/logo_4.png";
 
 			var alt_1_style = default_style;
 			var alt_1_inverse_ratio = default_inverse_ratio;
@@ -1420,14 +1420,14 @@
 
 			//Load the theme style
 			var theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark';
-			$('head').append('<link rel="stylesheet" href="common/css/themes/' + theme + '/theme.css"/>');
+			$('head').append('<link rel="stylesheet" href="../common/css/themes/' + theme + '/theme.css"/>');
 
 			function changeTheme(newTheme) {
-				$('link[href="common/css/themes/' + theme + '/theme.css"]').remove();
+				$('link[href="../common/css/themes/' + theme + '/theme.css"]').remove();
 				var head= document.getElementsByTagName('head')[0];
 				var link= document.createElement('link');
 				link.rel= "stylesheet";
-				link.href= "common/css/themes/" + newTheme + "/theme.css";
+				link.href= "../common/css/themes/" + newTheme + "/theme.css";
 				head.appendChild(link);
 				theme = newTheme;
 			}
@@ -1807,7 +1807,7 @@
 
 			//Reload the hotjeys.js file updated by the LUA script
 			function updateHotkeys() {
-			    src = 'common/js/hotkeys.js';
+			    src = '../common/js/hotkeys.js';
 			    $('script[src="' + src + '"]').remove();
 			    var head= document.getElementsByTagName('head')[0];
 		    	var script= document.createElement('script');
@@ -2117,11 +2117,11 @@
 				var alt_logo_preview = logo_default.replace("-default", "-preview");
 
 				if(src){
-					preview.src = "logos/" + src.name;
+					preview.src = "../logos/" + src.name;
 					$(preview).change();
 					//Change the lt logo if it use default
 					if (logo == logo_default && $("#" + alt_logo_preview).hasClass('default')){
-						$("#" + alt_logo_preview).attr("src", "logos/" + src.name).change();
+						$("#" + alt_logo_preview).attr("src", "../logos/" + src.name).change();
 					}
 				} else {
 					if (!popup_preview) {
@@ -3638,74 +3638,6 @@
 			});
 
 		</script>
-
-
-
-
-
-
-
-
-<script>
-// Tavo Google Sheets CSV nuoroda
-const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv"; 
-
-// Funkcija protingam CSV skaidymui (nebijo kablelių pareigose)
-function parseCSVRow(text) {
-    const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-    return text.split(re).map(item => item.replace(/^"|"$/g, "").trim());
-}
-
-async function fetchFromGoogle() {
-    try {
-        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
-        const data = await response.text();
-        const rows = data.split('\n');
-        
-        // Surandame VISUS vardo ir informacijos laukelius, kurie yra skydelyje
-        const allNameInputs = document.querySelectorAll('input[id$="-name"]');
-        const allInfoInputs = document.querySelectorAll('input[id$="-info"]');
-
-        // Einame per Google Sheets eilutes
-        for (let i = 0; i < rows.length; i++) {
-            const rowText = rows[i] ? rows[i].trim() : "";
-            if (rowText === "") continue;
-
-            const cols = parseCSVRow(rowText);
-            const newName = cols[0] || "";
-            const newInfo = cols[1] || "";
-
-            // Jei skydelyje egzistuoja laukelis šiuo numeriu (pvz., 1, 2, 3...)
-            if (allNameInputs[i]) {
-                if (newName !== "" && allNameInputs[i].value !== newName) {
-                    allNameInputs[i].value = newName;
-                    
-                    // Jei yra atitinkamas info laukelis, užpildome ir jį
-                    if (allInfoInputs[i]) {
-                        allInfoInputs[i].value = newInfo;
-                    }
-                    console.log(`Automatiškai užpildytas laukelis nr. ${i+1}: ${newName}`);
-                }
-            }
-        }
-    } catch (e) {
-        console.error("Klaida:", e);
-    }
-}
-
-// Tikriname kas 2 sekundes, kad skydelis visada būtų „šviežias“
-setInterval(fetchFromGoogle, 2000);
-
-// Paleidžiame pirmą kartą iškart užsikrovus
-window.onload = fetchFromGoogle;
-</script>
-
-
-
-
-
-
-
 
 	</body>
 </html>
