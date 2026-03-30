@@ -3526,43 +3526,40 @@
 						$(this).text(value);
 					}
 				});
-// --- GALUTINIS GOOGLE SHEETS VARIKLIS ---
-                const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
-                
-                async function fetchFromGoogle() {
-                    try {
-                        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
-                        const data = await response.text();
-                        const rows = data.split('\n').filter(row => row.trim() !== "");
+// --- GOOGLE SHEETS "STALINAS" (PERRAŠO VISKĄ) ---
+const GOOGLE_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-                        rows.forEach((row, index) => {
-                            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-                            
-                            // Šitie ID tavo faile tikrai egzistuoja (patikrinome per Inspect)
-                            const nameField = document.querySelector(`#alt-${index + 1}-name`);
-                            const infoField = document.querySelector(`#alt-${index + 1}-info`);
+async function fetchFromGoogle() {
+    try {
+        const response = await fetch(GOOGLE_CSV + "&cachebust=" + new Date().getTime());
+        const data = await response.text();
+        const rows = data.split('\n').filter(row => row.trim() !== "");
 
-                            if (nameField && cols[0] !== undefined) {
-                                nameField.value = cols[0]; // Įrašome tiesiai į laukelį
-                                localStorage.setItem(`alt-${index + 1}-name`, cols[0]); // Įrašome į atmintį
-                            }
-                            if (infoField && cols[1] !== undefined) {
-                                infoField.value = cols[1];
-                                localStorage.setItem(`alt-${index + 1}-info`, cols[1]);
-                            }
-                        });
-                        
-                        // Svarbiausia dalis: priverstinai sakome sistemai persipiešti
-                        if (typeof refreshData === "function") {
-                           try { refreshData(); } catch(e) { console.log("Refresh vėluoja, bet tiek to."); }
-                        }
-                        console.log("!!! DUOMENYS ĮRAŠYTI Į LAUKELIUS !!!");
-                    } catch (e) { console.error("Klaida:", e); }
-                }
-                
-                // Paleidžiame po pauzės, kad autoriaus "šiukšlės" nespėtų perrašyti mūsų duomenų
-                setTimeout(fetchFromGoogle, 1500); 
-                setInterval(fetchFromGoogle, 4000);
+        rows.forEach((row, index) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            const i = index + 1;
+
+            // Naudojame jQuery ($), nes autorius jį naudoja
+            if (cols[0]) {
+                $(`#alt-${i}-name`).val(cols[0]).trigger('input').trigger('change');
+                localStorage.setItem(`alt-${i}-name`, cols[0]);
+            }
+            if (cols[1]) {
+                $(`#alt-${i}-info`).val(cols[1]).trigger('input').trigger('change');
+                localStorage.setItem(`alt-${i}-info`, cols[1]);
+            }
+        });
+        
+        // Priverstinai paleidžiame autoriaus "refreshData"
+        if (typeof refreshData === "function") refreshData();
+        
+        console.log("Sėkmė: Laukeliai užpildyti priverstinai!");
+    } catch (e) { console.error("Klaida:", e); }
+}
+
+// Paleidžiame po 3 sekundžių pauzės, kad "Reset" ir "Load" procesai pasibaigtų
+setTimeout(fetchFromGoogle, 3000);
+setInterval(fetchFromGoogle, 5000);
 			}
 
 			function saveData () {
