@@ -3670,6 +3670,10 @@ async function masterSync() {
                 // Įrašome į localStorage
                 localStorage.setItem(`alt-${t}-name-${s}`, name);
                 localStorage.setItem(`alt-${t}-info-${s}`, info);
+				
+				// Pranešame Companion programai naują vardą
+fetch(`http://127.0.0.1:8000/resend/variable?label=internal&variable=vardas${id}&value=${encodeURIComponent(name)}`)
+.catch(err => console.log('Companion nepasiekiamas'));
 
                 // Atnaujiname laukelį pultelyje
                 const nameInp = document.getElementById(`alt-${t}-name-${s}`);
