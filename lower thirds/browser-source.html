@@ -1030,31 +1030,25 @@
 <script>
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
-    const vardas = params.get('vardas');
-
-    if (vardas) {
-        const dV = decodeURIComponent(vardas);
-        const el = $("#alt-1-name");
-        
-        if (el.length > 0) {
-            el.text(dV);
-            // PRIVERSTINIS STILIUS: padarome jį ryškų ir matomą bet kur
-            el.css({
-                "color": "red", 
-                "font-size": "50px",
-                "background-color": "yellow",
-                "position": "fixed",
-                "top": "50px",
-                "left": "50px",
-                "z-index": "9999",
-                "display": "block",
-                "opacity": "1"
-            });
-            console.log("Vardas nudažytas raudonai ir iškeltas į viršų!");
-        } else {
-            console.log("KLAIDA: Elementas #alt-1-name nerastas kode!");
-        }
-    }
+    const vardas = params.get('vardas') || "BE VARDO";
+    
+    // IŠTRINAME VISKĄ IR ĮRAŠOME NAUJĄ TURINĮ
+    document.body.innerHTML = `
+        <div style="
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            background: blue !important; 
+            color: white !important; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 100px; 
+            z-index: 99999;">
+            VARDAI: ${decodeURIComponent(vardas)}
+        </div>
+    `;
+    console.log("EKRANAS TURĖTŲ BŪTI MĖLYNAS SU VARDU:", vardas);
 };
 </script>
 
