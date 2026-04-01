@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  	<!--Animated Lower Thirds v1.6-->
     <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Lower thirds Source</title>
-	<link rel="stylesheet" href="https://group4konferenta-sudo.github.io/titrai/common/css/style-source.css">
+    <link rel="stylesheet" href="https://group4konferenta-sudo.github.io/titrai/common/css/style-source.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
- </head>
+</head>
   <body class="browser-source lower-thirds">
 		<!--Lower third 1-->
 		<div id="lower-third-1" class="alt left style-1 hide-anim">
@@ -1037,25 +1034,27 @@ window.onload = function() {
     const active = params.get('active');
 
     if (vardas) {
-        // Įrašome vardą į tavo surastą ID
-        const el = document.getElementById('alt-1-name');
-        if (el) {
-            el.innerText = decodeURIComponent(vardas);
-            // Priverstinis matomumas
-            el.style.opacity = "1";
-            el.style.display = "block";
-        }
+        const decodedVardas = decodeURIComponent(vardas);
+        // Įrašome į ID, kurį radai anksčiau
+        $("#alt-1-name").text(decodedVardas);
+        console.log("Vardas įrašytas:", decodedVardas);
     }
 
     if (active === 'true') {
-        // Jei po 1 sek. titras neišvažiuoja pats, mes jį "išstumiame"
+        // Priverstinis parodymas po 1 sekundės
         setTimeout(function() {
-            // Bandome v1.6 standartinę animaciją
-            if (typeof showAlt1 === "function") {
-                showAlt1();
+            // Bandome paleisti animaciją
+            if (typeof showAlt === "function") {
+                showAlt(1); 
             } else {
-                // Brutali jėga: parodome pagrindinį konteinerį
-                $("#alt-1").fadeIn(500).css("opacity", "1");
+                // Jei niekas neveikia - tiesiog parodome viską ekrane
+                $("#alt-1").css({
+                    "opacity": "1",
+                    "display": "block",
+                    "visibility": "visible",
+                    "transform": "none"
+                }).show();
+                console.log("Titras parodytas per jėgą");
             }
         }, 1000);
     }
