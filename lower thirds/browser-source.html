@@ -1031,36 +1031,29 @@
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const vardas = params.get('vardas');
-    const active = params.get('active');
 
     if (vardas) {
         const dV = decodeURIComponent(vardas);
-        // Įrašome į visus įmanomus v1.6 laukus
-        $("#alt-1-name, #f0, .alt-1-name").text(dV).css("opacity", "1").show();
-        console.log("Vardas įrašytas:", dV);
-    }
-
-    if (active === 'true') {
-        setTimeout(function() {
-            // 1. Bandome oficialią animaciją
-            if (typeof showAlt === "function") { showAlt(1); }
-            
-            // 2. Jei oficiali nesuveikia - "atidengiame" visą titrų bloką
-            // Mes padarome matomais VISUS elementus, kurie prasideda "alt-1"
-            $("[id^='alt-1']").each(function() {
-                $(this).css({
-                    "opacity": "1",
-                    "display": "block",
-                    "visibility": "visible",
-                    "transform": "none"
-                }).show();
+        const el = $("#alt-1-name");
+        
+        if (el.length > 0) {
+            el.text(dV);
+            // PRIVERSTINIS STILIUS: padarome jį ryškų ir matomą bet kur
+            el.css({
+                "color": "red", 
+                "font-size": "50px",
+                "background-color": "yellow",
+                "position": "fixed",
+                "top": "50px",
+                "left": "50px",
+                "z-index": "9999",
+                "display": "block",
+                "opacity": "1"
             });
-
-            // 3. Papildomai parodome bendrą konteinerį (jei jis yra)
-            $(".alt-1-container, .social-container, #alt-1-wrap").css("opacity", "1").show();
-            
-            console.log("Visi sluoksniai atidengti!");
-        }, 1200);
+            console.log("Vardas nudažytas raudonai ir iškeltas į viršų!");
+        } else {
+            console.log("KLAIDA: Elementas #alt-1-name nerastas kode!");
+        }
     }
 };
 </script>
