@@ -3704,6 +3704,29 @@ setTimeout(() => {
     masterSync();
     setInterval(masterSync, 2000); 
 }, 1000);
+// Šis kodas "stebi" tavo pulto paspaudimus ir praneša Companion
+document.addEventListener('click', function(e) {
+    // Tikriname, ar paspaudei ant mygtuko, kuris turi vardo slotą
+    const slotElement = e.target.querySelector('[id*="-slot-name-"]') || 
+                       (e.target.id.includes('-slot-name-') ? e.target : null);
+    
+    if (slotElement) {
+        const vardas = slotElement.innerText.trim();
+        if (vardas !== "") {
+            console.log("Siunčiame į Companion:", vardas);
+            
+            // Tavo Companion IP adresas
+            const companionIP = "192.168.165.124";
+            
+            // Siunčiame per v4 API (POST būdu)
+            fetch(`http://${companionIP}:8000/api/custom-variable/vardas1/value`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ value: vardas })
+            }).catch(err => console.log("Companion nepasiekiamas"));
+        }
+    }
+}, true);
 </script>
 
 
