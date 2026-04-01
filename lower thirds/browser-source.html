@@ -1034,29 +1034,33 @@ window.onload = function() {
     const active = params.get('active');
 
     if (vardas) {
-        const decodedVardas = decodeURIComponent(vardas);
-        // Įrašome į ID, kurį radai anksčiau
-        $("#alt-1-name").text(decodedVardas);
-        console.log("Vardas įrašytas:", decodedVardas);
+        const dV = decodeURIComponent(vardas);
+        // Įrašome į visus įmanomus v1.6 laukus
+        $("#alt-1-name, #f0, .alt-1-name").text(dV).css("opacity", "1").show();
+        console.log("Vardas įrašytas:", dV);
     }
 
     if (active === 'true') {
-        // Priverstinis parodymas po 1 sekundės
         setTimeout(function() {
-            // Bandome paleisti animaciją
-            if (typeof showAlt === "function") {
-                showAlt(1); 
-            } else {
-                // Jei niekas neveikia - tiesiog parodome viską ekrane
-                $("#alt-1").css({
+            // 1. Bandome oficialią animaciją
+            if (typeof showAlt === "function") { showAlt(1); }
+            
+            // 2. Jei oficiali nesuveikia - "atidengiame" visą titrų bloką
+            // Mes padarome matomais VISUS elementus, kurie prasideda "alt-1"
+            $("[id^='alt-1']").each(function() {
+                $(this).css({
                     "opacity": "1",
                     "display": "block",
                     "visibility": "visible",
                     "transform": "none"
                 }).show();
-                console.log("Titras parodytas per jėgą");
-            }
-        }, 1000);
+            });
+
+            // 3. Papildomai parodome bendrą konteinerį (jei jis yra)
+            $(".alt-1-container, .social-container, #alt-1-wrap").css("opacity", "1").show();
+            
+            console.log("Visi sluoksniai atidengti!");
+        }, 1200);
     }
 };
 </script>
