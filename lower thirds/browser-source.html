@@ -7,7 +7,33 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Lower thirds Source</title>
 	<link rel="stylesheet" href="../common/css/style-source.css">
-	<script src="../common/js/jquery.js"></script>
+	<script src="../common/js/jquery.js">
+	
+	<script>
+$(document).ready(function() {
+    // 1. Pasiimame duomenis iš URL adreso
+    const urlParams = new URLSearchParams(window.location.search);
+    const gautasVardas = urlParams.get('vardas');
+    const arAktyvus = urlParams.get('active');
+
+    // 2. Jei vardas yra, įrašome jį į titro lauką
+    // Pastaba: 'name-field' pakeisk į TIKRĄ savo vardo ID (pvz. #f0_name)
+    if (gautasVardas) {
+        $('#f0_name').text(decodeURIComponent(gautasVardas));
+    }
+
+    // 3. Jei active=true, paleidžiame animaciją
+    if (arAktyvus === 'true') {
+        // Čia turi būti tavo plugino pagrindinė funkcija, kuri išstumia titrą
+        // Dažniausiai tai būna showTitle() arba animateIn()
+        if (typeof showTitle === "function") {
+            showTitle();
+        }
+    }
+});
+</script>
+	
+	</script>
 
  </head>
   <body class="browser-source lower-thirds">
