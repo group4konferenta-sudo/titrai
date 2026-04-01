@@ -3650,22 +3650,15 @@ function updateCompanionVariable(name) {
     const companionIP = "192.168.165.124"; 
     const port = "8000";
     
-    // Naujas v4 būdas: siunčiame JSON objektą su "value" raktu
-    const url = `http://${companionIP}:${port}/api/custom-variable/vardas1/value`;
+    // Šis formatas Companion v4 yra pats "bukiausias", bet patikimiausias
+    // Jis tiesiog sako: "Kintamasis lygus tam ir tam"
+    const url = `http://${companionIP}:${port}/respress/variable/custom_vardas1?value=${encodeURIComponent(name)}`;
 
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ value: name }) // Čia tiksliai perduodame vardą
-    })
-    .then(() => console.log("Companion gavo vardą:", name))
-    .catch(err => {
-        // Jei vis tiek metama CORS klaida, naudojame seną patikimą GET būdą
-        const fallbackUrl = `http://${companionIP}:${port}/api/custom-variable/vardas1/value?value=${encodeURIComponent(name)}`;
-        fetch(fallbackUrl).then(() => console.log("Išsiųsta per Fallback:", name));
-    });
+    // Naudojame Image objektą, kad išvengtume visų naršyklės saugumo (CORS) problemų
+    const img = new Image();
+    img.src = url;
+    
+    console.log("Išsiųsta užklausa:", url);
 }
 
 // Surandame visus tavo sąrašo elementus (pvz., <li> arba <button>)
