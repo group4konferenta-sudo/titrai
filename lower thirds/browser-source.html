@@ -1031,32 +1031,41 @@
 
 
 <script>
-$(document).ready(function() {
+window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const vardas = params.get('vardas');
     const active = params.get('active');
 
+    // 1. Įrašome vardą (naudojame visus įmanomus būdus)
     if (vardas) {
-        // Įrašome vardą į visus įmanomus laukus, kuriuos naudoja v1.6
-        $('#alt-1-name').text(decodeURIComponent(vardas));
-        $('.alt-1-name').text(decodeURIComponent(vardas));
+        const vardasDecoded = decodeURIComponent(vardas);
+        // Įrašome į tavo rasta ID
+        if(document.getElementById('alt-1-name')) {
+            document.getElementById('alt-1-name').innerText = vardasDecoded;
+        }
     }
 
+    // 2. Jei active=true, priverstinai paleidžiame animaciją
     if (active === 'true') {
-        // Ši funkcija yra tavo plugino variklis. 
-        // Mes ją iškviečiame po trumpos pauzės, kad viskas spėtų užsikrauti.
         setTimeout(function() {
-            // Bandome visas įmanomas v1.6 funkcijas paeiliui:
-            if (typeof showAlt1 === "function") { showAlt1(); }
-            else if (typeof animIn === "function") { animIn(); }
-            else if (typeof showTitle === "function") { showTitle(); }
-            
-            // Jei funkcijos nesuveikia, parodome "per jėgą":
-            $('#alt-1').css('opacity', '1').show();
-            $('.alt-1-container').css('opacity', '1').show();
-        }, 800); 
+            // ALT v1.6 naudoja specifinį objektą animacijoms
+            // Bandome jį aktyvuoti per "brutalią jėgą"
+            if (typeof showAlt === "function") { 
+                showAlt(1); // Įjungia pirmąjį šabloną
+            } else if (typeof animateIn === "function") {
+                animateIn();
+            }
+
+            // JEI VIS TIEK NEVAŽIUOJA: Nuimame permatomumą rankiniu būdu
+            const container = document.getElementById('alt-1');
+            if (container) {
+                container.style.opacity = "1";
+                container.style.display = "block";
+                container.classList.add('active'); // Dauguma v1.6 šablonų naudoja šią klasę
+            }
+        }, 1000); // Duodame 1 sekundę visoms bibliotekoms užsikrauti
     }
-});
+};
 </script>
 
 
