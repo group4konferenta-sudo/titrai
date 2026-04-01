@@ -1037,26 +1037,18 @@ $(document).ready(function() {
     const active = params.get('active');
 
     if (vardas) {
-        // Įrašome vardą į pagrindinį lauką
         $('#alt-1-name').text(decodeURIComponent(vardas));
-        // Kai kurie šablonai naudoja šį ID vardui:
-        $('#f0').text(decodeURIComponent(vardas));
     }
 
     if (active === 'true') {
-        // 1. "Priverstinai" parodome elementus, jei jie paslėpti per CSS
-        $('#alt-1-name').css('opacity', '1').css('display', 'block');
-        
-        // 2. Animated Lower Thirds v1.6 pagrindinė komanda:
-        // Ši funkcija paprastai paleidžia visą animacijos ciklą
+        // Ši funkcija tavo faile yra atsakinga už animaciją. 
+        // Jei ji nepasileidžia, mes ją "pabudinsime" per jėgą:
         if (typeof showAlt1 === "function") {
-            showAlt1();
-        } else if (typeof showTitle === "function") {
-            showTitle();
+            showAlt1(); 
+        } else {
+            // Jei funkcija nerandama, tiesiog parodome konteinerį
+            $('#alt-1').fadeIn(500); 
         }
-
-        // 3. Jei naudojamas šablonas su CSS klasėmis (pvz., "active" arba "show")
-        $('#alt-1').addClass('active').addClass('show');
     }
 });
 </script>
