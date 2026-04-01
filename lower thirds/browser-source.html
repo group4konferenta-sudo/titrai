@@ -9,28 +9,29 @@
 	<link rel="stylesheet" href="../common/css/style-source.css">
 	<script src="../common/js/jquery.js">
 	
-	<script>
+<script>
 $(document).ready(function() {
-    // 1. Pasiimame duomenis iš URL adreso
     const urlParams = new URLSearchParams(window.location.search);
     const gautasVardas = urlParams.get('vardas');
     const arAktyvus = urlParams.get('active');
 
-    // 2. Jei vardas yra, įrašome jį į titro lauką
-    // Pastaba: 'name-field' pakeisk į TIKRĄ savo vardo ID (pvz. #f0_name)
+    // Įrašome vardą į tavo surastą ID
     if (gautasVardas) {
-        $('#f0_name').text(decodeURIComponent(gautasVardas));
+        $('#alt-1-name').text(decodeURIComponent(gautasVardas));
     }
 
-    // 3. Jei active=true, paleidžiame animaciją
+    // Priverstinis parodymas, jei URL sako "active=true"
     if (arAktyvus === 'true') {
-        // Čia turi būti tavo plugino pagrindinė funkcija, kuri išstumia titrą
-        // Dažniausiai tai būna showTitle() arba animateIn()
-        if (typeof showTitle === "function") {
-            showTitle();
-        }
+        // Kadangi tavo sistema naudoja Animated Lower Thirds, 
+        // ji dažniausiai laukia, kol elementas taps matomas
+        $('#alt-1-name').closest('div').show(); 
+        
+        // Jei tavo faile yra funkcija animacijai, ji suveiks čia:
+        if (typeof showTitle === "function") { showTitle(); }
     }
 });
+</script>
+
 </script>
 	
 	</script>
