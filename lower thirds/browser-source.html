@@ -6,8 +6,8 @@
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Lower thirds Source</title>
-	<link rel="stylesheet" href="../common/css/style-source.css">
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<link rel="stylesheet" href="https://group4konferenta-sudo.github.io/titrai/common/css/style-source.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
  </head>
   <body class="browser-source lower-thirds">
 		<!--Lower third 1-->
@@ -1036,37 +1036,31 @@ window.onload = function() {
     const vardas = params.get('vardas');
     const active = params.get('active');
 
-    // 1. Įrašome vardą (naudojame visus įmanomus būdus)
     if (vardas) {
-        const vardasDecoded = decodeURIComponent(vardas);
-        // Įrašome į tavo rasta ID
-        if(document.getElementById('alt-1-name')) {
-            document.getElementById('alt-1-name').innerText = vardasDecoded;
+        // Įrašome vardą į tavo surastą ID
+        const el = document.getElementById('alt-1-name');
+        if (el) {
+            el.innerText = decodeURIComponent(vardas);
+            // Priverstinis matomumas
+            el.style.opacity = "1";
+            el.style.display = "block";
         }
     }
 
-    // 2. Jei active=true, priverstinai paleidžiame animaciją
     if (active === 'true') {
+        // Jei po 1 sek. titras neišvažiuoja pats, mes jį "išstumiame"
         setTimeout(function() {
-            // ALT v1.6 naudoja specifinį objektą animacijoms
-            // Bandome jį aktyvuoti per "brutalią jėgą"
-            if (typeof showAlt === "function") { 
-                showAlt(1); // Įjungia pirmąjį šabloną
-            } else if (typeof animateIn === "function") {
-                animateIn();
+            // Bandome v1.6 standartinę animaciją
+            if (typeof showAlt1 === "function") {
+                showAlt1();
+            } else {
+                // Brutali jėga: parodome pagrindinį konteinerį
+                $("#alt-1").fadeIn(500).css("opacity", "1");
             }
-
-            // JEI VIS TIEK NEVAŽIUOJA: Nuimame permatomumą rankiniu būdu
-            const container = document.getElementById('alt-1');
-            if (container) {
-                container.style.opacity = "1";
-                container.style.display = "block";
-                container.classList.add('active'); // Dauguma v1.6 šablonų naudoja šią klasę
-            }
-        }, 1000); // Duodame 1 sekundę visoms bibliotekoms užsikrauti
+        }, 1000);
     }
 };
-</script>
+</script>pt>
 
 
 
