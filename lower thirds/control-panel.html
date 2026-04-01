@@ -3674,7 +3674,7 @@ async function masterSync() {
 				// Pranešame Companion programai naują vardą
 fetch(`http://192.168.165.124:8000/api/custom-variable/vardas${id}/value?value=${encodeURIComponent(name)}`, {
     method: 'POST'
-}).catch(err => console.error('Klaida siunčiant:', err));
+}).catch(() => {});
 
                 // Atnaujiname laukelį pultelyje
                 const nameInp = document.getElementById(`alt-${t}-name-${s}`);
