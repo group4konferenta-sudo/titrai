@@ -7,35 +7,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Lower thirds Source</title>
 	<link rel="stylesheet" href="../common/css/style-source.css">
-	<script src="../common/js/jquery.js">
-	
-<script>
-$(document).ready(function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const gautasVardas = urlParams.get('vardas');
-    const arAktyvus = urlParams.get('active');
-
-    // Įrašome vardą į tavo surastą ID
-    if (gautasVardas) {
-        $('#alt-1-name').text(decodeURIComponent(gautasVardas));
-    }
-
-    // Priverstinis parodymas, jei URL sako "active=true"
-    if (arAktyvus === 'true') {
-        // Kadangi tavo sistema naudoja Animated Lower Thirds, 
-        // ji dažniausiai laukia, kol elementas taps matomas
-        $('#alt-1-name').closest('div').show(); 
-        
-        // Jei tavo faile yra funkcija animacijai, ji suveiks čia:
-        if (typeof showTitle === "function") { showTitle(); }
-    }
-});
-</script>
-
-</script>
-	
-	</script>
-
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
  </head>
   <body class="browser-source lower-thirds">
 		<!--Lower third 1-->
@@ -1053,6 +1025,46 @@ $(document).ready(function() {
 		bcr.postMessage({resend: true});
 
 	</script>
+
+
+
+
+
+<script>
+$(document).ready(function() {
+    const params = new URLSearchParams(window.location.search);
+    const vardas = params.get('vardas');
+    const active = params.get('active');
+
+    if (vardas) {
+        // Įrašome vardą į pagrindinį lauką
+        $('#alt-1-name').text(decodeURIComponent(vardas));
+        // Kai kurie šablonai naudoja šį ID vardui:
+        $('#f0').text(decodeURIComponent(vardas));
+    }
+
+    if (active === 'true') {
+        // 1. "Priverstinai" parodome elementus, jei jie paslėpti per CSS
+        $('#alt-1-name').css('opacity', '1').css('display', 'block');
+        
+        // 2. Animated Lower Thirds v1.6 pagrindinė komanda:
+        // Ši funkcija paprastai paleidžia visą animacijos ciklą
+        if (typeof showAlt1 === "function") {
+            showAlt1();
+        } else if (typeof showTitle === "function") {
+            showTitle();
+        }
+
+        // 3. Jei naudojamas šablonas su CSS klasėmis (pvz., "active" arba "show")
+        $('#alt-1').addClass('active').addClass('show');
+    }
+});
+</script>
+
+
+
+
+
 
   </body>
 </html>
