@@ -1037,18 +1037,24 @@ $(document).ready(function() {
     const active = params.get('active');
 
     if (vardas) {
+        // Įrašome vardą į visus įmanomus laukus, kuriuos naudoja v1.6
         $('#alt-1-name').text(decodeURIComponent(vardas));
+        $('.alt-1-name').text(decodeURIComponent(vardas));
     }
 
     if (active === 'true') {
-        // Ši funkcija tavo faile yra atsakinga už animaciją. 
-        // Jei ji nepasileidžia, mes ją "pabudinsime" per jėgą:
-        if (typeof showAlt1 === "function") {
-            showAlt1(); 
-        } else {
-            // Jei funkcija nerandama, tiesiog parodome konteinerį
-            $('#alt-1').fadeIn(500); 
-        }
+        // Ši funkcija yra tavo plugino variklis. 
+        // Mes ją iškviečiame po trumpos pauzės, kad viskas spėtų užsikrauti.
+        setTimeout(function() {
+            // Bandome visas įmanomas v1.6 funkcijas paeiliui:
+            if (typeof showAlt1 === "function") { showAlt1(); }
+            else if (typeof animIn === "function") { animIn(); }
+            else if (typeof showTitle === "function") { showTitle(); }
+            
+            // Jei funkcijos nesuveikia, parodome "per jėgą":
+            $('#alt-1').css('opacity', '1').show();
+            $('.alt-1-container').css('opacity', '1').show();
+        }, 800); 
     }
 });
 </script>
