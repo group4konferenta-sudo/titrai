@@ -3645,40 +3645,49 @@
 
 
 <script>
-// Funkcija, kuri siunčia vardą į Companion v4
-function updateCompanionVariable(name) {
-    const companionIP = "192.168.165.124"; 
-    const port = "8000";
-    
-    // Šis formatas Companion v4 yra pats "bukiausias", bet patikimiausias
-    // Jis tiesiog sako: "Kintamasis lygus tam ir tam"
-    const url = `http://${companionIP}:${port}/respress/variable/custom_vardas1?value=${encodeURIComponent(name)}`;
+const SHEET_ID = '1zEDGkcT1O4AN7e3cwJCgorD1KglxYFabMsj6huYyIvk'; // Įklijuok savo Sheets ID iš URL
+const COMPANION_IP = '192.168.165.124';
 
-    // Naudojame Image objektą, kad išvengtume visų naršyklės saugumo (CORS) problemų
-    const img = new Image();
-    img.src = url;
-    
-    console.log("Išsiųsta užklausa:", url);
+// 1. Funkcija, kuri paima duomenis iš Google Sheets (paverčia į JSON)
+async function loadVardai() {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const sarasas = document.getElementById('vardu-sarasas'); // Įsitikink, kad turi tokį ID savo HTML
+        sarasas.innerHTML = ''; // Išvalome seną sąrašą
+
+        rows.forEach(row => {
+            const vardas = row.c[0].v; // Pirmas stulpelis (A)
+            const li = document.createElement('li');
+            li.innerText = vardas;
+            li.style.cursor = "pointer";
+            li.onclick = () => siustiICompanion(vardas);
+            sarasas.appendChild(li);
+        });
+        console.log("Sąrašas atnaujintas!");
+    } catch (e) {
+        console.error("Klaida skaitant Sheets:", e);
+    }
 }
 
-// Surandame visus tavo sąrašo elementus (pvz., <li> arba <button>)
-// Ir padarome, kad paspaudus jie iškviestų siuntimą
-document.addEventListener('DOMContentLoaded', () => {
-    // Jei tavo vardai yra <li> elementuose:
-    const vardai = document.querySelectorAll('li'); 
-    
-    vardai.forEach(el => {
-        el.style.cursor = "pointer"; // Kad matytųsi, jog galima spausti
-        el.addEventListener('click', () => {
-            const vardas = el.innerText.trim();
-            updateCompanionVariable(vardas);
-            
-            // Vizualus patvirtinimas pulte
-            el.style.backgroundColor = "#d1f7d1"; 
-            setTimeout(() => el.style.backgroundColor = "", 500);
-        });
+// 2. Funkcija, kuri siunčia vardą į Companion v4
+function siustiICompanion(name) {
+    fetch(`http://${COMPANION_IP}:8000/api/custom-variable/vardas1/value`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ value: name })
+    }).then(() => {
+        alert("Išsiųsta: " + name); // Laikinas patvirtinimas
     });
-});
+}
+
+// 3. Paleidžiame automatiką
+loadVardai();
+setInterval(loadVardai, 30000); // Atnaujiname kas 30 sekundžių
 </script>
 
 
