@@ -3645,70 +3645,40 @@
 
 
 <script>
-const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
+// Funkcija, kuri siunčia vardą į Companion v4
+function updateCompanionVariable(name) {
+    const companionIP = "192.168.165.124"; // Įsitikink, kad tai tavo kompiuterio IP!
+    const port = "8000";
+    
+    // Companion v4 API kelias kintamojo reikšmei keisti
+    const url = `http://${companionIP}:${port}/api/custom-variable/vardas1/value?value=${encodeURIComponent(name)}`;
 
-async function masterSync() {
-    try {
-        const r = await fetch(GOOGLE_URL + "&cachebust=" + Date.now());
-        const data = await r.text();
-        const rows = data.split('\n').filter(row => row.trim() !== "");
-
-        // Einame per visas Google Sheets eilutes (iki 40)
-        rows.forEach((row, index) => {
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
-            const rowNum = index + 1; // Eilutė Sheets'e (1, 2, 3...)
-            
-            const name = cols[0] || "";
-            const info = cols[1] || "";
-
-            // Nustatome, kuriam šablonui (t) ir kuriam slotui (s) priklauso ši eilutė
-            let t = Math.ceil(rowNum / 10); // 1-10 -> t=1, 11-20 -> t=2 ir t.t.
-            let s = rowNum % 10;           // Slot numeris (1-9)
-            if (s === 0) s = 10;           // Jei liekana 0, vadinasi tai 10-as slotas
-
-            if (t <= 4) { // Tikriname tik pirmuosius 4 šablonus
-                // Įrašome į localStorage
-                localStorage.setItem(`alt-${t}-name-${s}`, name);
-                localStorage.setItem(`alt-${t}-info-${s}`, info);
-				
-				// Pranešame Companion programai naują vardą
-fetch(`http://192.168.165.124:8000/api/custom-variable/vardas${id}/value?value=${encodeURIComponent(name)}`, {
-    method: 'POST'
-}).catch(() => {});
-
-                // Atnaujiname laukelį pultelyje
-                const nameInp = document.getElementById(`alt-${t}-name-${s}`);
-                if (nameInp) nameInp.value = name;
-
-                // Atnaujiname mygtuką (slotą)
-                const slot = document.getElementById(`alt-${t}-slot-name-${s}`);
-                if (slot) {
-                    slot.innerText = name;
-                    
-                    if (name.trim() !== "") {
-                        const parent = slot.parentElement;
-                        parent.style.backgroundColor = "#2a5a8a";
-                        parent.style.opacity = "1";
-                        parent.style.pointerEvents = "auto";
-                        parent.classList.add('active-slot');
-                    } else {
-                        // Jei eilutė tuščia, "užgesiname" mygtuką
-                        const parent = slot.parentElement;
-                        parent.style.backgroundColor = ""; 
-                        parent.classList.remove('active-slot');
-                    }
-                }
-            }
-        });
-        console.log("Duomenys paskirstyti po šablonus (10 per kiekvieną).");
-    } catch (e) { console.error("Klaida:", e); }
+    fetch(url, {
+        method: 'POST',
+        mode: 'no-cors' // Leidžia siųsti užklausą be saugumo blokavimo
+    })
+    .then(() => console.log("Išsiųsta į Companion:", name))
+    .catch(err => console.error("Klaida siunčiant:", err));
 }
 
-// Paleidžiame variklį greičiau (kas 2 sekundes)
-setTimeout(() => {
-    masterSync();
-    setInterval(masterSync, 2000); 
-}, 1000);
+// Surandame visus tavo sąrašo elementus (pvz., <li> arba <button>)
+// Ir padarome, kad paspaudus jie iškviestų siuntimą
+document.addEventListener('DOMContentLoaded', () => {
+    // Jei tavo vardai yra <li> elementuose:
+    const vardai = document.querySelectorAll('li'); 
+    
+    vardai.forEach(el => {
+        el.style.cursor = "pointer"; // Kad matytųsi, jog galima spausti
+        el.addEventListener('click', () => {
+            const vardas = el.innerText.trim();
+            updateCompanionVariable(vardas);
+            
+            // Vizualus patvirtinimas pulte
+            el.style.backgroundColor = "#d1f7d1"; 
+            setTimeout(() => el.style.backgroundColor = "", 500);
+        });
+    });
+});
 </script>
 
 
