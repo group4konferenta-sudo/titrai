@@ -3704,27 +3704,29 @@ setTimeout(() => {
     masterSync();
     setInterval(masterSync, 2000); 
 }, 1000);
-// Šis kodas "stebi" tavo pulto paspaudimus ir praneša Companion
+// Šis kodas laukia, kol paspausi bet kurį vardo mygtuką pulte
 document.addEventListener('click', function(e) {
-    // Tikriname, ar paspaudei ant mygtuko, kuris turi vardo slotą
-    const slotElement = e.target.querySelector('[id*="-slot-name-"]') || 
-                       (e.target.id.includes('-slot-name-') ? e.target : null);
-    
-    if (slotElement) {
-        const vardas = slotElement.innerText.trim();
-        if (vardas !== "") {
-            console.log("Siunčiame į Companion:", vardas);
-            
-            // Tavo Companion IP adresas
-            const companionIP = "192.168.165.124";
-            
-            // Siunčiame per v4 API (POST būdu)
-            fetch(`http://${companionIP}:8000/api/custom-variable/vardas1/value`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ value: vardas })
-            }).catch(err => console.log("Companion nepasiekiamas"));
-        }
+    // Surandame elementą, kuriame yra vardas (tavo id struktūra: alt-X-slot-name-X)
+    let el = e.target;
+    if (!el.id || !el.id.includes('slot-name')) {
+        el = e.target.querySelector('[id*="slot-name"]');
+    }
+
+    if (el && el.innerText.trim() !== "") {
+        const vardas = el.innerText.trim();
+        const companionIP = "192.168.165.124";
+        
+        console.log("Mėginame siųsti vardą:", vardas);
+
+        // Companion v4 "Legacy" užklausa per Image objektą (aplenkia CORS klaidas)
+        // Šis URL formatas tiesiogiai įrašo reikšmę į kintamąjį
+        const url = `http://${companionIP}:8000/api/custom-variable/vardas1/value?value=${encodeURIComponent(vardas)}`;
+        
+        const img = new Image();
+        img.src = url;
+        
+        // Papildomai pabandome ir standartinį būdą (dėl užtikrintumo)
+        fetch(url, { mode: 'no-cors' }).catch(() => {});
     }
 }, true);
 </script>
