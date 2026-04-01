@@ -15,9 +15,6 @@
 		<script src="../common/js/jquery-ui.js"></script>
 	</head>
 	<body class="lower-thirds-panel panel">
-	<ul id="vardu-sarasas" style="list-style: none; padding: 20px; font-family: sans-serif; font-size: 24px;">
-    <li>Kraunamas vardų sąrašas iš Google Sheets...</li>
-	</ul>
 		<div id="alt-panel" class="static-panel-top" style="margin-bottom: 0px">
 			
 			<div id="alt-main-config-content"> <!--// Main Settings//-->
@@ -3648,49 +3645,65 @@
 
 
 <script>
-const SHEET_ID = '1zEDGkcT1O4AN7e3cwJCgorD1KglxYFabMsj6huYyIvk'; // Įklijuok savo Sheets ID iš URL
-const COMPANION_IP = '192.168.165.124';
+const GOOGLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCT_6T0SLhkjL31iFSEFMESE7CDsoSMMqsjSUFglHi2KLZNuRzeAogXgkUiv_8BdtCGfMH-kuZGQec/pub?output=csv";
 
-// 1. Funkcija, kuri paima duomenis iš Google Sheets (paverčia į JSON)
-async function loadVardai() {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+async function masterSync() {
     try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
+        const r = await fetch(GOOGLE_URL + "&cachebust=" + Date.now());
+        const data = await r.text();
+        const rows = data.split('\n').filter(row => row.trim() !== "");
 
-        const sarasas = document.getElementById('vardu-sarasas'); // Įsitikink, kad turi tokį ID savo HTML
-        sarasas.innerHTML = ''; // Išvalome seną sąrašą
+        // Einame per visas Google Sheets eilutes (iki 40)
+        rows.forEach((row, index) => {
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, "").trim());
+            const rowNum = index + 1; // Eilutė Sheets'e (1, 2, 3...)
+            
+            const name = cols[0] || "";
+            const info = cols[1] || "";
 
-        rows.forEach(row => {
-            const vardas = row.c[0].v; // Pirmas stulpelis (A)
-            const li = document.createElement('li');
-            li.innerText = vardas;
-            li.style.cursor = "pointer";
-            li.onclick = () => siustiICompanion(vardas);
-            sarasas.appendChild(li);
+            // Nustatome, kuriam šablonui (t) ir kuriam slotui (s) priklauso ši eilutė
+            let t = Math.ceil(rowNum / 10); // 1-10 -> t=1, 11-20 -> t=2 ir t.t.
+            let s = rowNum % 10;           // Slot numeris (1-9)
+            if (s === 0) s = 10;           // Jei liekana 0, vadinasi tai 10-as slotas
+
+            if (t <= 4) { // Tikriname tik pirmuosius 4 šablonus
+                // Įrašome į localStorage
+                localStorage.setItem(`alt-${t}-name-${s}`, name);
+                localStorage.setItem(`alt-${t}-info-${s}`, info);
+
+                // Atnaujiname laukelį pultelyje
+                const nameInp = document.getElementById(`alt-${t}-name-${s}`);
+                if (nameInp) nameInp.value = name;
+
+                // Atnaujiname mygtuką (slotą)
+                const slot = document.getElementById(`alt-${t}-slot-name-${s}`);
+                if (slot) {
+                    slot.innerText = name;
+                    
+                    if (name.trim() !== "") {
+                        const parent = slot.parentElement;
+                        parent.style.backgroundColor = "#2a5a8a";
+                        parent.style.opacity = "1";
+                        parent.style.pointerEvents = "auto";
+                        parent.classList.add('active-slot');
+                    } else {
+                        // Jei eilutė tuščia, "užgesiname" mygtuką
+                        const parent = slot.parentElement;
+                        parent.style.backgroundColor = ""; 
+                        parent.classList.remove('active-slot');
+                    }
+                }
+            }
         });
-        console.log("Sąrašas atnaujintas!");
-    } catch (e) {
-        console.error("Klaida skaitant Sheets:", e);
-    }
+        console.log("Duomenys paskirstyti po šablonus (10 per kiekvieną).");
+    } catch (e) { console.error("Klaida:", e); }
 }
 
-// 2. Funkcija, kuri siunčia vardą į Companion v4
-function siustiICompanion(name) {
-    fetch(`http://${COMPANION_IP}:8000/api/custom-variable/vardas1/value`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ value: name })
-    }).then(() => {
-        alert("Išsiųsta: " + name); // Laikinas patvirtinimas
-    });
-}
-
-// 3. Paleidžiame automatiką
-loadVardai();
-setInterval(loadVardai, 30000); // Atnaujiname kas 30 sekundžių
+// Paleidžiame variklį greičiau (kas 2 sekundes)
+setTimeout(() => {
+    masterSync();
+    setInterval(masterSync, 2000); 
+}, 1000);
 </script>
 
 
