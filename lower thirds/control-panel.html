@@ -3647,18 +3647,25 @@
 <script>
 // Funkcija, kuri siunčia vardą į Companion v4
 function updateCompanionVariable(name) {
-    const companionIP = "192.168.165.124"; // Įsitikink, kad tai tavo kompiuterio IP!
+    const companionIP = "192.168.165.124"; 
     const port = "8000";
     
-    // Companion v4 API kelias kintamojo reikšmei keisti
-    const url = `http://${companionIP}:${port}/api/custom-variable/vardas1/value?value=${encodeURIComponent(name)}`;
+    // Naujas v4 būdas: siunčiame JSON objektą su "value" raktu
+    const url = `http://${companionIP}:${port}/api/custom-variable/vardas1/value`;
 
     fetch(url, {
         method: 'POST',
-        mode: 'no-cors' // Leidžia siųsti užklausą be saugumo blokavimo
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ value: name }) // Čia tiksliai perduodame vardą
     })
-    .then(() => console.log("Išsiųsta į Companion:", name))
-    .catch(err => console.error("Klaida siunčiant:", err));
+    .then(() => console.log("Companion gavo vardą:", name))
+    .catch(err => {
+        // Jei vis tiek metama CORS klaida, naudojame seną patikimą GET būdą
+        const fallbackUrl = `http://${companionIP}:${port}/api/custom-variable/vardas1/value?value=${encodeURIComponent(name)}`;
+        fetch(fallbackUrl).then(() => console.log("Išsiųsta per Fallback:", name));
+    });
 }
 
 // Surandame visus tavo sąrašo elementus (pvz., <li> arba <button>)
