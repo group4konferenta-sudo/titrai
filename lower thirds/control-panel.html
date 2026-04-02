@@ -3704,31 +3704,38 @@ setTimeout(() => {
     masterSync();
     setInterval(masterSync, 2000); 
 }, 1000);
-// Šis kodas laukia, kol paspausi bet kurį vardo mygtuką pulte
+// Šis kodas pagauna bet kurį paspaudimą ant tavo pulto slotų
 document.addEventListener('click', function(e) {
-    // Surandame elementą, kuriame yra vardas (tavo id struktūra: alt-X-slot-name-X)
-    let el = e.target;
-    if (!el.id || !el.id.includes('slot-name')) {
-        el = e.target.querySelector('[id*="slot-name"]');
-    }
-
-    if (el && el.innerText.trim() !== "") {
-        const vardas = el.innerText.trim();
-        const companionIP = "192.168.165.124";
-        
-        console.log("Mėginame siųsti vardą:", vardas);
-
-        // Companion v4 "Legacy" užklausa per Image objektą (aplenkia CORS klaidas)
-        // Šis URL formatas tiesiogiai įrašo reikšmę į kintamąjį
-        const url = `http://${companionIP}:8000/api/custom-variable/vardas1/value?value=${encodeURIComponent(vardas)}`;
-        
-        const img = new Image();
-        img.src = url;
-        
-        // Papildomai pabandome ir standartinį būdą (dėl užtikrintumo)
-        fetch(url, { mode: 'no-cors' }).catch(() => {});
+    // Ieškome artimiausio elemento, kuris turi tekstą ir yra susijęs su slotais
+    let target = e.target;
+    
+    // Keliaujame aukštyn per elementus, kol rasime tą, kuris turi vardą
+    while (target && target !== document) {
+        if (target.id && target.id.includes('slot-name')) {
+            const vardas = target.innerText.trim();
+            if (vardas !== "") {
+                console.log("PAGAUTAS PASPAUDIMAS! Siunčiame:", vardas);
+                siustiICompanion(vardas);
+            }
+            break;
+        }
+        target = target.parentElement;
     }
 }, true);
+
+// Atskira funkcija siuntimui, kad kodas būtų švarus
+function siustiICompanion(name) {
+    const companionIP = "192.168.165.124";
+    const url = `http://${companionIP}:8000/api/custom-variable/vardas1/value?value=${encodeURIComponent(name)}`;
+    
+    // Siunčiame dviem būdais iškart - vienas tikrai "prasimuš"
+    const img = new Image();
+    img.src = url;
+    
+    fetch(url, { mode: 'no-cors' })
+        .then(() => console.log("Išsiųsta į Companion sėkmingai!"))
+        .catch(err => console.log("Siuntimo klaida:", err));
+}
 </script>
 
 
